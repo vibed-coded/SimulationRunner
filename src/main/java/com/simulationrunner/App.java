@@ -27,7 +27,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         config = new GridConfig(10, 10, 50);
-        grid = new Grid(config, 3); // Create grid with 3 keys
+        grid = new Grid(config, 1); // Create grid with 1 key
         hud = new HUD();
 
         width = config.getPixelWidth();
@@ -45,10 +45,10 @@ public class App extends Application {
         // Add keyboard event handler for WASD controls
         scene.setOnKeyPressed(event -> {
             switch (event.getCode()) {
-                case W -> grid.getPlayer().move(0, -1, config);  // Up
-                case A -> grid.getPlayer().move(-1, 0, config);  // Left
-                case S -> grid.getPlayer().move(0, 1, config);   // Down
-                case D -> grid.getPlayer().move(1, 0, config);   // Right
+                case W -> grid.getPlayer().move(0, -1, config, grid.getDoor());  // Up
+                case A -> grid.getPlayer().move(-1, 0, config, grid.getDoor());  // Left
+                case S -> grid.getPlayer().move(0, 1, config, grid.getDoor());   // Down
+                case D -> grid.getPlayer().move(1, 0, config, grid.getDoor());   // Right
             }
             checkKeyPickup(); // Check for key collection after movement
             render(); // Redraw after movement
@@ -67,6 +67,7 @@ public class App extends Application {
                 player.getGridX() == key.getGridX() &&
                 player.getGridY() == key.getGridY()) {
                 key.collect();
+                player.addKey(key.getColor()); // Add key to player's inventory
             }
         }
     }
@@ -92,6 +93,11 @@ public class App extends Application {
         // Render all keys
         for (Key key : grid.getKeys()) {
             key.render(gc, config);
+        }
+
+        // Render the door (if it exists)
+        if (grid.getDoor() != null) {
+            grid.getDoor().render(gc, config);
         }
 
         // Render the player

@@ -8,8 +8,8 @@ SimulationRunner - A 2D grid-based game where a player entity moves around a gri
 
 **Current Implementation Status:**
 - Player movement with WASD controls
-- Key collection system with multiple keys
-- HUD footer showing collected keys
+- Key collection system with rainbow-colored keys
+- HUD footer showing collected keys with color coding
 - Entity inheritance hierarchy (Player, Key extend Entity)
 - Grid rendering with configurable dimensions
 - Boundary detection and collision prevention
@@ -55,8 +55,9 @@ SimulationRunner - A 2D grid-based game where a player entity moves around a gri
 - **GridConfig** (`com.simulationrunner.config.GridConfig`): Immutable configuration class for grid dimensions (gridWidth, gridHeight) and cellSize. Provides computed pixel dimensions via `getPixelWidth()`, `getPixelHeight()`, and `getPixelHeightWithHUD(hudHeight)`. Default constructor creates 10x10 grid with 10px cells.
 - **Entity** (`com.simulationrunner.entity.Entity`): Abstract base class for all game entities. Defines protected gridX/gridY position fields, abstract `render(GraphicsContext, GridConfig)` method, and utility `manhattanDistance()` for spawn distance calculations. Implements equals(), hashCode(), toString() that subclasses inherit.
 - **Player** (`com.simulationrunner.entity.Player`): Extends Entity. Spawns at random grid position via `createRandom()` factory method. Implements `move(deltaX, deltaY, GridConfig)` with boundary checking. Renders as blue circle at 60% cell size (CIRCLE_SIZE_RATIO = 0.6).
-- **Key** (`com.simulationrunner.entity.Key`): Extends Entity. Spawns at least 5 tiles away from player (Manhattan distance) via `createRandomKeys(config, player, count)`. Has `collected` boolean state, `collect()` method, and `isCollected()` getter. Renders as gold rectangle at 30% cell size (RECTANGLE_SIZE_RATIO = 0.3). Does not render when collected.
-- **HUD** (`com.simulationrunner.ui.HUD`): Heads-Up Display system. Renders 10px footer at bottom of canvas showing key collection status. Displays key icons with brightness reduction for uncollected keys (40% brightness via UNCOLLECTED_BRIGHTNESS constant). Integrates with GridConfig via `getPixelHeightWithHUD()`.
+- **Key** (`com.simulationrunner.entity.Key`): Extends Entity. Spawns at least 5 tiles away from player (Manhattan distance) via `createRandomKeys(config, player, count)`. Has `collected` boolean state, `collect()` method, and `isCollected()` getter. Each key has a unique color assigned from ColorPalette. Renders as colored rectangle at 30% cell size (RECTANGLE_SIZE_RATIO = 0.3). Does not render when collected.
+- **ColorPalette** (`com.simulationrunner.ColorPalette`): Utility class providing rainbow color palette for keys. Contains 8 predefined colors (red, orange, yellow, green, cyan, blue, purple, magenta). Uses cyclic assignment via modulo when key count exceeds palette size. Non-instantiable utility class with static methods `getKeyColor(index)` and `getPaletteSize()`.
+- **HUD** (`com.simulationrunner.ui.HUD`): Heads-Up Display system. Renders 10px footer at bottom of canvas showing key collection status. Displays key icons in their assigned colors with brightness reduction for uncollected keys (40% brightness via UNCOLLECTED_BRIGHTNESS constant). Integrates with GridConfig via `getPixelHeightWithHUD()`.
 - **Constants** (`com.simulationrunner.Constants`): Utility class defining default values (DEFAULT_GRID_WIDTH=10, DEFAULT_GRID_HEIGHT=10, DEFAULT_CELL_SIZE=10). **Note:** Currently unused in App, which uses hardcoded GridConfig instead.
 - **SystemInfo** (`com.simulationrunner.SystemInfo`): Utility class for retrieving Java and JavaFX runtime versions via `javaVersion()` and `javafxVersion()` methods.
 
@@ -86,14 +87,15 @@ SimulationRunner - A 2D grid-based game where a player entity moves around a gri
   3. Render HUD footer via hud.render(gc, config, keys)
 - Entity self-rendering pattern: each entity converts its own grid coordinates to pixels
 - Player renders as filled blue circle centered in grid cell at 60% cell size
-- Keys render as filled gold rectangles at 30% cell size (invisible when collected)
-- HUD renders 10px footer below grid with key collection status (collected keys bright, uncollected dimmed to 40%)
+- Keys render as filled colored rectangles at 30% cell size (invisible when collected), each with unique rainbow color
+- HUD renders 10px footer below grid with key collection status (collected keys bright, uncollected dimmed to 40%), preserving key colors
 
 ### Testing
 - **Test Framework:** JUnit 5.11.4 with comprehensive unit test coverage for core components
 - **GridConfigTest** (`src/test/java/.../config/GridConfigTest.java`): Tests constructors, pixel calculations (including HUD height), validation, toString()
 - **PlayerTest** (`src/test/java/.../entity/PlayerTest.java`): Tests random spawn, constructor validation, movement with boundary checking, null safety, equality contracts
 - **KeyTest** (`src/test/java/.../entity/KeyTest.java`): Tests random spawn with distance constraints, collection state, rendering behavior when collected
+- **ColorPaletteTest** (`src/test/java/.../ColorPaletteTest.java`): Tests color retrieval, cyclic palette assignment, negative index validation, palette uniqueness, non-instantiability
 - **HUDTest** (`src/test/java/.../ui/HUDTest.java`): Tests HUD rendering, key icon display, collected/uncollected visual states
 - **Test Coverage Gaps:** No tests for App, Grid, or SystemInfo classes
 - **No Integration Tests:** All tests are unit tests; no end-to-end testing of input → movement → collection → rendering flow
@@ -110,4 +112,5 @@ SimulationRunner - A 2D grid-based game where a player entity moves around a gri
 8. **Manual Render Triggers**: Render is called explicitly after state changes rather than continuous game loop, suitable for turn-based/event-driven game.
 9. **Spatial Spawn Constraints**: Keys spawn with minimum Manhattan distance (5 tiles) from player to prevent trivial collection. Fallback to farthest position for small grids.
 10. **HUD Integration**: Canvas height calculation includes HUD footer via `getPixelHeightWithHUD()`, keeping UI layout concerns in GridConfig rather than scattered across App.
+11. **Rainbow Color Palette**: Keys use predefined rainbow palette via ColorPalette utility class with cyclic assignment. Centralizes color logic and ensures visual consistency across game and HUD. Non-instantiable utility class pattern prevents accidental instantiation.
 - Do not generate code during planning that is not the point. The LLM is just wasting tokens since it is duplicate generation.

@@ -1,6 +1,7 @@
 package com.simulationrunner;
 
 import com.simulationrunner.config.GridConfig;
+import com.simulationrunner.entity.Door;
 import com.simulationrunner.entity.Key;
 import com.simulationrunner.entity.Player;
 
@@ -11,6 +12,7 @@ public class Grid {
     private final GridConfig config;
     private final Player player;
     private final List<Key> keys;
+    private final Door door;
 
     public Grid(GridConfig config, int keyCount) {
         if (config == null) {
@@ -22,6 +24,13 @@ public class Grid {
         this.config = config;
         this.player = Player.createRandom(config);
         this.keys = Key.createRandomKeys(config, player, keyCount);
+
+        // Create door with same color as first key (if any keys exist)
+        if (!keys.isEmpty()) {
+            this.door = Door.createRandom(config, player, keys.get(0).getColor());
+        } else {
+            this.door = null;
+        }
     }
 
     public GridConfig getConfig() {
@@ -34,5 +43,9 @@ public class Grid {
 
     public List<Key> getKeys() {
         return Collections.unmodifiableList(keys);
+    }
+
+    public Door getDoor() {
+        return door;
     }
 }
