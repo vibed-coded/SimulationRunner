@@ -35,6 +35,7 @@ public class Door extends Entity {
     /**
      * Creates a door at a random position on the grid.
      * The door will spawn at least 5 tiles away from the player.
+     * The door will spawn with at least 1 cell room on each side (x in range [1, gridWidth-2]).
      *
      * @param config the grid configuration
      * @param player the player entity to maintain distance from
@@ -50,9 +51,14 @@ public class Door extends Entity {
         int MIN_SPAWN_DISTANCE = 5;
         int MAX_SPAWN_ATTEMPTS = 1000;
 
+        // Calculate valid x range: door must have at least 1 cell on each side
+        int minX = Math.max(1, 0);
+        int maxX = Math.min(config.getGridWidth() - 2, config.getGridWidth() - 1);
+
         // Try to find a position at least MIN_SPAWN_DISTANCE away from player
+        // and with at least 1 cell room on each side
         for (int attempt = 0; attempt < MAX_SPAWN_ATTEMPTS; attempt++) {
-            int x = RANDOM.nextInt(config.getGridWidth());
+            int x = minX + RANDOM.nextInt(maxX - minX + 1);
             int y = RANDOM.nextInt(config.getGridHeight());
             GridPosition candidatePosition = new GridPosition(x, y);
 
@@ -70,13 +76,18 @@ public class Door extends Entity {
     /**
      * Creates a door at the farthest possible position from the player.
      * Used as fallback for small grids where minimum distance cannot be satisfied.
+     * Ensures at least 1 cell room on each side.
      */
     private static Door createFarthest(GridConfig config, Player player, Color color) {
         int maxDistance = -1;
-        GridPosition bestPosition = new GridPosition(0, 0);
+        GridPosition bestPosition = new GridPosition(1, 0);
 
-        // Sample grid positions to find the farthest one
-        for (int x = 0; x < config.getGridWidth(); x++) {
+        // Calculate valid x range: door must have at least 1 cell on each side
+        int minX = Math.max(1, 0);
+        int maxX = Math.min(config.getGridWidth() - 2, config.getGridWidth() - 1);
+
+        // Sample grid positions to find the farthest one within valid range
+        for (int x = minX; x <= maxX; x++) {
             for (int y = 0; y < config.getGridHeight(); y++) {
                 GridPosition candidatePosition = new GridPosition(x, y);
                 int distance = candidatePosition.manhattanDistance(player.getPosition());

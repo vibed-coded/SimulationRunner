@@ -24,16 +24,31 @@ SimulationRunner - A 2D grid-based game where a player entity moves around a gri
 - Uses Maven wrapper (no separate Maven installation needed)
 
 ### Build and Test
+**Unix/Linux/macOS:**
 ```bash
 ./mvnw clean test        # Run all tests
 ./mvnw clean package     # Build the project
 ./mvnw javafx:run        # Run the JavaFX application
 ```
 
+**Windows:**
+```cmd
+mvnw.cmd clean test      # Run all tests
+mvnw.cmd clean package   # Build the project
+mvnw.cmd javafx:run      # Run the JavaFX application
+```
+
 ### Running Single Tests
+**Unix/Linux/macOS:**
 ```bash
 ./mvnw test -Dtest=GridConfigTest              # Run specific test class
 ./mvnw test -Dtest=GridConfigTest#testMethod   # Run specific test method
+```
+
+**Windows:**
+```cmd
+mvnw.cmd test -Dtest=GridConfigTest              # Run specific test class
+mvnw.cmd test -Dtest=GridConfigTest#testMethod   # Run specific test method
 ```
 
 ## Architecture
@@ -123,4 +138,9 @@ SimulationRunner - A 2D grid-based game where a player entity moves around a gri
 11. **Rainbow Color Palette**: Keys and doors use predefined rainbow palette via ColorPalette utility class with cyclic assignment. Centralizes color logic and ensures visual consistency across game and HUD. Non-instantiable utility class pattern prevents accidental instantiation.
 12. **Color-Based Access Control**: Door color matches first key's color, creating key-door pairing. Player inventory uses Set<Color> for O(1) lookup when checking door access via canPass().
 13. **Movement Overloading**: Player has two move() overloads - one for basic boundary checking, one for door collision. App uses door-aware version. Provides flexibility for different movement contexts.
-- Do not generate code during planning that is not the point. The LLM is just wasting tokens since it is duplicate generation.
+
+## Development Guidelines
+
+- When planning code changes, focus on architectural decisions rather than implementation details. Avoid generating code during the planning phase.
+- Respect the entity self-rendering pattern: each entity should manage its own render() implementation rather than centralizing rendering logic.
+- When adding new entity types, extend the Entity abstract class and implement the render() method.

@@ -51,17 +51,38 @@ public class Key extends Entity {
      * @throws IllegalArgumentException if count is negative
      */
     public static List<Key> createRandomKeys(GridConfig config, Player player, int count) {
+        return createRandomKeys(config, player, count, 0, config.getGridWidth() - 1);
+    }
+
+    /**
+     * Creates a list of keys at random positions on the grid, constrained to a specific x-coordinate range.
+     * Each key will spawn at least 5 tiles away from the player (Manhattan distance).
+     * Keys are assigned unique colors from the rainbow palette, cycling if needed.
+     *
+     * @param config the grid configuration
+     * @param player the player entity to maintain distance from
+     * @param count the number of keys to create
+     * @param minX the minimum x-coordinate for key spawning (inclusive)
+     * @param maxX the maximum x-coordinate for key spawning (inclusive)
+     * @return a list of randomly positioned keys with unique colors
+     * @throws NullPointerException if config or player is null
+     * @throws IllegalArgumentException if count is negative or minX/maxX are invalid
+     */
+    public static List<Key> createRandomKeys(GridConfig config, Player player, int count, int minX, int maxX) {
         Objects.requireNonNull(config, "GridConfig cannot be null");
         Objects.requireNonNull(player, "Player cannot be null");
         if (count < 0) {
             throw new IllegalArgumentException("count must be non-negative");
+        }
+        if (minX < 0 || maxX >= config.getGridWidth() || minX > maxX) {
+            throw new IllegalArgumentException("Invalid x-coordinate range");
         }
 
         List<Key> keys = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++) {
             Color keyColor = ColorPalette.getKeyColor(i);
-            Key key = createSingleKey(config, player, keyColor);
+            Key key = createSingleKey(config, player, keyColor, minX, maxX);
             keys.add(key);
         }
 
@@ -71,10 +92,11 @@ public class Key extends Entity {
     /**
      * Creates a single key at a random position, maintaining minimum distance from player.
      */
-    private static Key createSingleKey(GridConfig config, Player player, Color color) {
+    private static Key createSingleKey(GridConfig config, Player player, Color color, int minX, int maxX) {
         // Try to find a position at least MIN_SPAWN_DISTANCE away from player
+        // within the specified x-coordinate range
         for (int attempt = 0; attempt < MAX_SPAWN_ATTEMPTS; attempt++) {
-            int x = RANDOM.nextInt(config.getGridWidth());
+            int x = minX + RANDOM.nextInt(maxX - minX + 1);
             int y = RANDOM.nextInt(config.getGridHeight());
             GridPosition candidatePosition = new GridPosition(x, y);
 
@@ -86,19 +108,19 @@ public class Key extends Entity {
         }
 
         // Fallback: if we couldn't find a valid position, place at farthest point from player
-        return createFarthestKey(config, player, color);
+        return createFarthestKey(config, player, color, minX, maxX);
     }
 
     /**
      * Creates a key at the farthest possible position from the player.
      * Used as fallback for small grids where minimum distance cannot be satisfied.
      */
-    private static Key createFarthestKey(GridConfig config, Player player, Color color) {
+    private static Key createFarthestKey(GridConfig config, Player player, Color color, int minX, int maxX) {
         int maxDistance = -1;
-        GridPosition bestPosition = new GridPosition(0, 0);
+        GridPosition bestPosition = new GridPosition(minX, 0);
 
-        // Sample grid positions to find the farthest one
-        for (int x = 0; x < config.getGridWidth(); x++) {
+        // Sample grid positions to find the farthest one within the specified x range
+        for (int x = minX; x <= maxX; x++) {
             for (int y = 0; y < config.getGridHeight(); y++) {
                 GridPosition candidatePosition = new GridPosition(x, y);
                 int distance = candidatePosition.manhattanDistance(player.getPosition());

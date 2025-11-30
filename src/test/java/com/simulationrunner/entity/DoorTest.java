@@ -193,4 +193,17 @@ class DoorTest {
         // But toString would differ
         assertNotEquals(door1.toString(), door2.toString());
     }
+
+    @RepeatedTest(100)
+    void testDoorSpawnsWithRoomBehind() {
+        GridConfig config = new GridConfig(10, 10, 50);
+        Player player = Player.createRandom(config);
+        Door door = Door.createRandom(config, player, Color.RED);
+
+        // Door should spawn with at least 1 cell on each side
+        // This means x should be in range [1, gridWidth-2]
+        assertTrue(door.getGridX() >= 1, "Door x-coordinate should be >= 1");
+        assertTrue(door.getGridX() <= config.getGridWidth() - 2,
+                   "Door x-coordinate should be <= gridWidth-2");
+    }
 }
