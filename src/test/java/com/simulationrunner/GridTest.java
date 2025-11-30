@@ -16,6 +16,7 @@ class GridTest {
 
         assertNotNull(grid.getPlayer());
         assertNotNull(grid.getDoor());
+        assertNotNull(grid.getPad());
         assertEquals(1, grid.getKeys().size());
         assertFalse(grid.getWalls().isEmpty());
     }
@@ -27,6 +28,7 @@ class GridTest {
 
         assertNotNull(grid.getPlayer());
         assertNull(grid.getDoor());
+        assertNull(grid.getPad());
         assertTrue(grid.getKeys().isEmpty());
         assertTrue(grid.getWalls().isEmpty());
     }
@@ -82,5 +84,26 @@ class GridTest {
         assertTrue(doorX >= 1, "Door should have at least 1 cell on left (x >= 1)");
         assertTrue(doorX <= config.getGridWidth() - 2,
                   "Door should have at least 1 cell on right (x <= " + (config.getGridWidth() - 2) + ")");
+    }
+
+    @RepeatedTest(100)
+    void testPadSpawnsOnOppositeSideFromPlayer() {
+        GridConfig config = new GridConfig(10, 10, 50);
+        Grid grid = new Grid(config, 1);
+
+        int playerX = grid.getPlayer().getGridX();
+        int doorX = grid.getDoor().getGridX();
+        int padX = grid.getPad().getGridX();
+
+        if (playerX < doorX) {
+            // Player on left, pad should be on right
+            assertTrue(padX > doorX,
+                      "Pad should be on right side when player is on left");
+        } else if (playerX > doorX) {
+            // Player on right, pad should be on left
+            assertTrue(padX < doorX,
+                      "Pad should be on left side when player is on right");
+        }
+        // If player == door (rare), we don't assert specific behavior
     }
 }

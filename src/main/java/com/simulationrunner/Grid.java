@@ -3,6 +3,7 @@ package com.simulationrunner;
 import com.simulationrunner.config.GridConfig;
 import com.simulationrunner.entity.Door;
 import com.simulationrunner.entity.Key;
+import com.simulationrunner.entity.Pad;
 import com.simulationrunner.entity.Player;
 import com.simulationrunner.entity.Wall;
 
@@ -15,6 +16,7 @@ public class Grid {
     private final List<Key> keys;
     private final Door door;
     private final List<Wall> walls;
+    private final Pad pad;
 
     public Grid(GridConfig config, int keyCount) {
         if (config == null) {
@@ -57,10 +59,14 @@ public class Grid {
 
             // Create vertical wall through the door's x-coordinate with a gap at the door
             this.walls = Wall.createVerticalWallWithGap(config, door.getGridX(), door.getPosition());
+
+            // Create pad on the opposite side from the player
+            this.pad = Pad.createOpposite(config, player, door);
         } else {
             this.keys = Collections.emptyList();
             this.door = null;
             this.walls = Collections.emptyList();
+            this.pad = null;
         }
     }
 
@@ -82,5 +88,9 @@ public class Grid {
 
     public List<Wall> getWalls() {
         return Collections.unmodifiableList(walls);
+    }
+
+    public Pad getPad() {
+        return pad;
     }
 }
