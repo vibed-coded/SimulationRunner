@@ -42,9 +42,16 @@ SimulationRunner - A 2D grid-based game where a player entity must find a key an
 
 ### Core Components
 - **App** (`com.simulationrunner.App`): Main JavaFX application entry point. Creates grid, canvas, and renders the grid using JavaFX GraphicsContext.
-- **Grid** (`com.simulationrunner.Grid`): Represents the game grid, wraps GridConfig with validation.
+- **Grid** (`com.simulationrunner.Grid`): Represents the game grid, wraps GridConfig with validation. Creates and manages the Player entity.
 - **GridConfig** (`com.simulationrunner.config.GridConfig`): Immutable configuration for grid dimensions (gridWidth, gridHeight) and cellSize. Provides computed pixel dimensions via `getPixelWidth()` and `getPixelHeight()`.
+- **Player** (`com.simulationrunner.entity.Player`): Java record representing the player entity. Spawns at random grid position, renders as blue circle. Uses modern compact constructor for validation.
 - **Constants** (`com.simulationrunner.Constants`): Defines default values (DEFAULT_GRID_WIDTH, DEFAULT_GRID_HEIGHT, DEFAULT_CELL_SIZE).
+
+### Entity System
+- Entities are implemented as **Java records** (modern Java feature) for immutability
+- Each entity is responsible for its own rendering via a `render(GraphicsContext, GridConfig)` method
+- Player spawns randomly using `Player.createRandom(GridConfig)` factory method
+- Entities are positioned using grid coordinates, then converted to pixel coordinates for rendering
 
 ## Design Decisions
 

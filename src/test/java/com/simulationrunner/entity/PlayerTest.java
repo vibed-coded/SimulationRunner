@@ -13,10 +13,10 @@ class PlayerTest {
         GridConfig config = new GridConfig(10, 10, 50);
         Player player = Player.createRandom(config);
 
-        assertTrue(player.gridX() >= 0, "Player X coordinate should be non-negative");
-        assertTrue(player.gridX() < config.getGridWidth(), "Player X coordinate should be within grid width");
-        assertTrue(player.gridY() >= 0, "Player Y coordinate should be non-negative");
-        assertTrue(player.gridY() < config.getGridHeight(), "Player Y coordinate should be within grid height");
+        assertTrue(player.getGridX() >= 0, "Player X coordinate should be non-negative");
+        assertTrue(player.getGridX() < config.getGridWidth(), "Player X coordinate should be within grid width");
+        assertTrue(player.getGridY() >= 0, "Player Y coordinate should be non-negative");
+        assertTrue(player.getGridY() < config.getGridHeight(), "Player Y coordinate should be within grid height");
     }
 
     @Test
@@ -24,14 +24,14 @@ class PlayerTest {
         GridConfig smallGrid = new GridConfig(5, 5, 20);
         Player player1 = Player.createRandom(smallGrid);
 
-        assertTrue(player1.gridX() >= 0 && player1.gridX() < 5);
-        assertTrue(player1.gridY() >= 0 && player1.gridY() < 5);
+        assertTrue(player1.getGridX() >= 0 && player1.getGridX() < 5);
+        assertTrue(player1.getGridY() >= 0 && player1.getGridY() < 5);
 
         GridConfig largeGrid = new GridConfig(20, 15, 10);
         Player player2 = Player.createRandom(largeGrid);
 
-        assertTrue(player2.gridX() >= 0 && player2.gridX() < 20);
-        assertTrue(player2.gridY() >= 0 && player2.gridY() < 15);
+        assertTrue(player2.getGridX() >= 0 && player2.getGridX() < 20);
+        assertTrue(player2.getGridY() >= 0 && player2.getGridY() < 15);
     }
 
     @Test
@@ -45,16 +45,16 @@ class PlayerTest {
     void testPlayerConstructorWithValidCoordinates() {
         Player player = new Player(5, 7);
 
-        assertEquals(5, player.gridX());
-        assertEquals(7, player.gridY());
+        assertEquals(5, player.getGridX());
+        assertEquals(7, player.getGridY());
     }
 
     @Test
     void testPlayerConstructorWithZeroCoordinates() {
         Player player = new Player(0, 0);
 
-        assertEquals(0, player.gridX());
-        assertEquals(0, player.gridY());
+        assertEquals(0, player.getGridX());
+        assertEquals(0, player.getGridY());
     }
 
     @Test
@@ -77,8 +77,8 @@ class PlayerTest {
         Player player = Player.createRandom(config);
 
         // Verify player is always within bounds across many iterations
-        assertTrue(player.gridX() >= 0 && player.gridX() < 10);
-        assertTrue(player.gridY() >= 0 && player.gridY() < 10);
+        assertTrue(player.getGridX() >= 0 && player.getGridX() < 10);
+        assertTrue(player.getGridY() >= 0 && player.getGridY() < 10);
     }
 
     @Test

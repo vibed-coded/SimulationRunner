@@ -10,13 +10,31 @@ import java.util.random.RandomGenerator;
 /**
  * Represents a player entity on the grid.
  * The player spawns at a random grid location and is rendered as a blue circle.
- *
- * @param gridX the X coordinate on the grid (0 to gridWidth-1)
- * @param gridY the Y coordinate on the grid (0 to gridHeight-1)
  */
-public record Player(int gridX, int gridY) {
+public class Player {
     private static final double CIRCLE_SIZE_RATIO = 0.6;
     private static final RandomGenerator RANDOM = RandomGenerator.getDefault();
+
+    private int gridX;
+    private int gridY;
+
+    /**
+     * Creates a new player at the specified grid position.
+     *
+     * @param gridX the X coordinate on the grid (0 to gridWidth-1)
+     * @param gridY the Y coordinate on the grid (0 to gridHeight-1)
+     * @throws IllegalArgumentException if coordinates are negative
+     */
+    public Player(int gridX, int gridY) {
+        if (gridX < 0) {
+            throw new IllegalArgumentException("gridX must be non-negative");
+        }
+        if (gridY < 0) {
+            throw new IllegalArgumentException("gridY must be non-negative");
+        }
+        this.gridX = gridX;
+        this.gridY = gridY;
+    }
 
     /**
      * Creates a new player at a random position on the grid.
@@ -34,15 +52,21 @@ public record Player(int gridX, int gridY) {
     }
 
     /**
-     * Compact constructor with validation.
+     * Gets the X coordinate on the grid.
+     *
+     * @return the grid X coordinate
      */
-    public Player {
-        if (gridX < 0) {
-            throw new IllegalArgumentException("gridX must be non-negative");
-        }
-        if (gridY < 0) {
-            throw new IllegalArgumentException("gridY must be non-negative");
-        }
+    public int getGridX() {
+        return gridX;
+    }
+
+    /**
+     * Gets the Y coordinate on the grid.
+     *
+     * @return the grid Y coordinate
+     */
+    public int getGridY() {
+        return gridY;
     }
 
     /**
@@ -69,5 +93,23 @@ public record Player(int gridX, int gridY) {
         // Draw filled blue circle centered in the cell
         gc.setFill(Color.BLUE);
         gc.fillOval(centerX - radius, centerY - radius, diameter, diameter);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Player player = (Player) obj;
+        return gridX == player.gridX && gridY == player.gridY;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gridX, gridY);
+    }
+
+    @Override
+    public String toString() {
+        return "Player[gridX=" + gridX + ", gridY=" + gridY + "]";
     }
 }
