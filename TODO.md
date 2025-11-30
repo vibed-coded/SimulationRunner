@@ -26,16 +26,20 @@
 - [x] Call `grid.getPlayer().render(gc, config)` to draw the player
 - [x] Ensure player renders on top of grid lines
 
-### 4. Write Unit Tests
-- [ ] Create `src/test/java/com/simulationrunner/entity/` directory
-- [ ] Create `PlayerTest.java` test class
-- [ ] Test: Player spawns within grid bounds
-- [ ] Test: `getGridX()` and `getGridY()` return valid coordinates
-- [ ] Test: Constructor with different grid sizes
-- [ ] Test: Verify random spawn distribution (optional)
+### 4. Write Unit Tests ✅
+- [x] Create `src/test/java/com/simulationrunner/entity/` directory
+- [x] Create `PlayerTest.java` test class
+- [x] Test: Player spawns within grid bounds
+- [x] Test: `gridX()` and `gridY()` accessor methods return valid coordinates
+- [x] Test: Constructor with different grid sizes
+- [x] Test: Verify random spawn distribution (100 iterations)
+- [x] Test: Null config handling
+- [x] Test: Negative coordinate validation
+- [x] Test: Record equality and hashCode
+- [x] Test: toString implementation
 
 ### 5. Testing & Validation ✅
-- [x] Run all tests: `./mvnw test` (7 tests passed)
+- [x] Run all tests: `./mvnw test` (117 tests passed - 7 GridConfig + 110 Player)
 - [x] Build project: `./mvnw clean package`
 - [x] Run application: `./mvnw javafx:run`
 - [x] Visual verification:
