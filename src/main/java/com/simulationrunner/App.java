@@ -64,8 +64,7 @@ public class App extends Application {
 
         for (Key key : grid.getKeys()) {
             if (!key.isCollected() &&
-                player.getGridX() == key.getGridX() &&
-                player.getGridY() == key.getGridY()) {
+                player.getPosition().isSameAs(key.getPosition())) {
                 key.collect();
                 player.addKey(key.getColor()); // Add key to player's inventory
             }

@@ -1,5 +1,6 @@
 package com.simulationrunner.entity;
 
+import com.simulationrunner.GridPosition;
 import com.simulationrunner.config.GridConfig;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -24,12 +25,11 @@ public class Player extends Entity {
     /**
      * Creates a new player at the specified grid position.
      *
-     * @param gridX the X coordinate on the grid (0 to gridWidth-1)
-     * @param gridY the Y coordinate on the grid (0 to gridHeight-1)
-     * @throws IllegalArgumentException if coordinates are negative
+     * @param position the position on the grid
+     * @throws NullPointerException if position is null
      */
-    public Player(int gridX, int gridY) {
-        super(gridX, gridY);
+    public Player(GridPosition position) {
+        super(position);
         this.inventory = new HashSet<>();
     }
 
@@ -45,7 +45,7 @@ public class Player extends Entity {
 
         int x = RANDOM.nextInt(config.getGridWidth());
         int y = RANDOM.nextInt(config.getGridHeight());
-        return new Player(x, y);
+        return new Player(new GridPosition(x, y));
     }
 
     /**
@@ -59,14 +59,16 @@ public class Player extends Entity {
     public void move(int deltaX, int deltaY, GridConfig config) {
         Objects.requireNonNull(config, "GridConfig cannot be null");
 
-        int newX = gridX + deltaX;
-        int newY = gridY + deltaY;
+        try {
+            GridPosition newPosition = position.add(deltaX, deltaY);
 
-        // Only update position if new position is within bounds
-        if (newX >= 0 && newX < config.getGridWidth() &&
-            newY >= 0 && newY < config.getGridHeight()) {
-            this.gridX = newX;
-            this.gridY = newY;
+            // Only update position if new position is within bounds
+            if (newPosition.x() >= 0 && newPosition.x() < config.getGridWidth() &&
+                newPosition.y() >= 0 && newPosition.y() < config.getGridHeight()) {
+                this.position = newPosition;
+            }
+        } catch (IllegalArgumentException e) {
+            // New position would have negative coordinates, don't move
         }
     }
 
@@ -83,26 +85,28 @@ public class Player extends Entity {
     public void move(int deltaX, int deltaY, GridConfig config, Door door) {
         Objects.requireNonNull(config, "GridConfig cannot be null");
 
-        int newX = gridX + deltaX;
-        int newY = gridY + deltaY;
+        try {
+            GridPosition newPosition = position.add(deltaX, deltaY);
 
-        // Check if new position is within bounds
-        if (newX < 0 || newX >= config.getGridWidth() ||
-            newY < 0 || newY >= config.getGridHeight()) {
-            return; // Out of bounds, don't move
-        }
-
-        // Check if there's a door at the new position
-        if (door != null && door.getGridX() == newX && door.getGridY() == newY) {
-            // Door blocks movement unless player has matching key
-            if (!door.canPass(this)) {
-                return; // Can't pass through door, don't move
+            // Check if new position is within bounds
+            if (newPosition.x() < 0 || newPosition.x() >= config.getGridWidth() ||
+                newPosition.y() < 0 || newPosition.y() >= config.getGridHeight()) {
+                return; // Out of bounds, don't move
             }
-        }
 
-        // Move is valid
-        this.gridX = newX;
-        this.gridY = newY;
+            // Check if there's a door at the new position
+            if (door != null && door.getPosition().isSameAs(newPosition)) {
+                // Door blocks movement unless player has matching key
+                if (!door.canPass(this)) {
+                    return; // Can't pass through door, don't move
+                }
+            }
+
+            // Move is valid
+            this.position = newPosition;
+        } catch (IllegalArgumentException e) {
+            // New position would have negative coordinates, don't move
+        }
     }
 
     /**
@@ -145,8 +149,8 @@ public class Player extends Entity {
         int cellSize = config.getCellSize();
 
         // Calculate pixel position of cell center
-        double centerX = (gridX * cellSize) + (cellSize / 2.0);
-        double centerY = (gridY * cellSize) + (cellSize / 2.0);
+        double centerX = (position.x() * cellSize) + (cellSize / 2.0);
+        double centerY = (position.y() * cellSize) + (cellSize / 2.0);
 
         // Calculate circle diameter and radius
         double diameter = cellSize * CIRCLE_SIZE_RATIO;

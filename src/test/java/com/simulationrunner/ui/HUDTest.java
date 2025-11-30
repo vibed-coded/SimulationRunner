@@ -1,5 +1,6 @@
 package com.simulationrunner.ui;
 
+import com.simulationrunner.GridPosition;
 import com.simulationrunner.config.GridConfig;
 import com.simulationrunner.entity.Key;
 import javafx.scene.canvas.Canvas;
@@ -59,9 +60,9 @@ class HUDTest {
         GridConfig config = new GridConfig(10, 10, 50);
 
         List<Key> keys = new ArrayList<>();
-        keys.add(new Key(0, 0, Color.GOLD));
-        keys.add(new Key(1, 1, Color.GOLD));
-        keys.add(new Key(2, 2, Color.GOLD));
+        keys.add(new Key(new GridPosition(0, 0), Color.GOLD));
+        keys.add(new Key(new GridPosition(1, 1), Color.GOLD));
+        keys.add(new Key(new GridPosition(2, 2), Color.GOLD));
 
         assertDoesNotThrow(() -> hud.render(gc, config, keys));
     }
@@ -74,9 +75,9 @@ class HUDTest {
         GridConfig config = new GridConfig(10, 10, 50);
 
         List<Key> keys = new ArrayList<>();
-        Key key1 = new Key(0, 0, Color.GOLD);
-        Key key2 = new Key(1, 1, Color.GOLD);
-        Key key3 = new Key(2, 2, Color.GOLD);
+        Key key1 = new Key(new GridPosition(0, 0), Color.GOLD);
+        Key key2 = new Key(new GridPosition(1, 1), Color.GOLD);
+        Key key3 = new Key(new GridPosition(2, 2), Color.GOLD);
         key1.collect();
         key2.collect();
         key3.collect();
@@ -95,9 +96,9 @@ class HUDTest {
         GridConfig config = new GridConfig(10, 10, 50);
 
         List<Key> keys = new ArrayList<>();
-        Key key1 = new Key(0, 0, Color.GOLD);
-        Key key2 = new Key(1, 1, Color.GOLD);
-        Key key3 = new Key(2, 2, Color.GOLD);
+        Key key1 = new Key(new GridPosition(0, 0), Color.GOLD);
+        Key key2 = new Key(new GridPosition(1, 1), Color.GOLD);
+        Key key3 = new Key(new GridPosition(2, 2), Color.GOLD);
         key1.collect();
         key2.collect();
         keys.add(key1);
@@ -115,9 +116,9 @@ class HUDTest {
         GridConfig config = new GridConfig(10, 10, 50);
 
         List<Key> keys = new ArrayList<>();
-        keys.add(new Key(0, 0, Color.RED));
-        keys.add(new Key(1, 1, Color.BLUE));
-        keys.add(new Key(2, 2, Color.GREEN));
+        keys.add(new Key(new GridPosition(0, 0), Color.RED));
+        keys.add(new Key(new GridPosition(1, 1), Color.BLUE));
+        keys.add(new Key(new GridPosition(2, 2), Color.GREEN));
 
         // Should not throw - tests that different colors render correctly
         assertDoesNotThrow(() -> hud.render(gc, config, keys));

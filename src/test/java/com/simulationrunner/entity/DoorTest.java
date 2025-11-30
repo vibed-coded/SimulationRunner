@@ -1,5 +1,6 @@
 package com.simulationrunner.entity;
 
+import com.simulationrunner.GridPosition;
 import com.simulationrunner.config.GridConfig;
 import javafx.scene.paint.Color;
 import org.junit.jupiter.api.RepeatedTest;
@@ -11,7 +12,7 @@ class DoorTest {
 
     @Test
     void testConstructorWithValidCoordinates() {
-        Door door = new Door(5, 7, Color.RED);
+        Door door = new Door(new GridPosition(5, 7), Color.RED);
         assertEquals(5, door.getGridX());
         assertEquals(7, door.getGridY());
         assertEquals(Color.RED, door.getColor());
@@ -19,35 +20,35 @@ class DoorTest {
 
     @Test
     void testConstructorWithNegativeX() {
-        assertThrows(IllegalArgumentException.class, () -> new Door(-1, 5, Color.RED));
+        assertThrows(IllegalArgumentException.class, () -> new Door(new GridPosition(-1, 5), Color.RED));
     }
 
     @Test
     void testConstructorWithNegativeY() {
-        assertThrows(IllegalArgumentException.class, () -> new Door(5, -1, Color.RED));
+        assertThrows(IllegalArgumentException.class, () -> new Door(new GridPosition(5, -1), Color.RED));
     }
 
     @Test
     void testConstructorWithBothNegative() {
-        assertThrows(IllegalArgumentException.class, () -> new Door(-1, -1, Color.RED));
+        assertThrows(IllegalArgumentException.class, () -> new Door(new GridPosition(-1, -1), Color.RED));
     }
 
     @Test
     void testConstructorWithZeroCoordinates() {
-        Door door = new Door(0, 0, Color.RED);
+        Door door = new Door(new GridPosition(0, 0), Color.RED);
         assertEquals(0, door.getGridX());
         assertEquals(0, door.getGridY());
     }
 
     @Test
     void testConstructorWithNullColor() {
-        assertThrows(NullPointerException.class, () -> new Door(5, 5, null));
+        assertThrows(NullPointerException.class, () -> new Door(new GridPosition(5, 5), null));
     }
 
     @Test
     void testCreateRandomWithValidConfig() {
         GridConfig config = new GridConfig(10, 10, 50);
-        Player player = new Player(5, 5);
+        Player player = new Player(new GridPosition(5, 5));
 
         Door door = Door.createRandom(config, player, Color.RED);
 
@@ -62,7 +63,7 @@ class DoorTest {
     @RepeatedTest(10)
     void testCreateRandomMaintainsDistance() {
         GridConfig config = new GridConfig(20, 20, 50);
-        Player player = new Player(10, 10);
+        Player player = new Player(new GridPosition(10, 10));
 
         Door door = Door.createRandom(config, player, Color.BLUE);
 
@@ -77,7 +78,7 @@ class DoorTest {
 
     @Test
     void testCreateRandomWithNullConfig() {
-        Player player = new Player(5, 5);
+        Player player = new Player(new GridPosition(5, 5));
         assertThrows(NullPointerException.class,
             () -> Door.createRandom(null, player, Color.RED));
     }
@@ -92,15 +93,15 @@ class DoorTest {
     @Test
     void testCreateRandomWithNullColor() {
         GridConfig config = new GridConfig(10, 10, 50);
-        Player player = new Player(5, 5);
+        Player player = new Player(new GridPosition(5, 5));
         assertThrows(NullPointerException.class,
             () -> Door.createRandom(config, player, null));
     }
 
     @Test
     void testCanPassWithMatchingKey() {
-        Door door = new Door(5, 5, Color.GREEN);
-        Player player = new Player(3, 3);
+        Door door = new Door(new GridPosition(5, 5), Color.GREEN);
+        Player player = new Player(new GridPosition(3, 3));
 
         // Player doesn't have key yet
         assertFalse(door.canPass(player));
@@ -114,8 +115,8 @@ class DoorTest {
 
     @Test
     void testCanPassWithWrongKey() {
-        Door door = new Door(5, 5, Color.GREEN);
-        Player player = new Player(3, 3);
+        Door door = new Door(new GridPosition(5, 5), Color.GREEN);
+        Player player = new Player(new GridPosition(3, 3));
 
         // Player gets a different colored key
         player.addKey(Color.RED);
@@ -126,8 +127,8 @@ class DoorTest {
 
     @Test
     void testCanPassWithMultipleKeys() {
-        Door door = new Door(5, 5, Color.BLUE);
-        Player player = new Player(3, 3);
+        Door door = new Door(new GridPosition(5, 5), Color.BLUE);
+        Player player = new Player(new GridPosition(3, 3));
 
         // Player collects multiple keys
         player.addKey(Color.RED);
@@ -140,14 +141,14 @@ class DoorTest {
 
     @Test
     void testCanPassWithNullPlayer() {
-        Door door = new Door(5, 5, Color.RED);
+        Door door = new Door(new GridPosition(5, 5), Color.RED);
         assertThrows(NullPointerException.class, () -> door.canPass(null));
     }
 
     @Test
     void testGetColor() {
-        Door redDoor = new Door(1, 1, Color.RED);
-        Door blueDoor = new Door(2, 2, Color.BLUE);
+        Door redDoor = new Door(new GridPosition(1, 1), Color.RED);
+        Door blueDoor = new Door(new GridPosition(2, 2), Color.BLUE);
 
         assertEquals(Color.RED, redDoor.getColor());
         assertEquals(Color.BLUE, blueDoor.getColor());
@@ -155,7 +156,7 @@ class DoorTest {
 
     @Test
     void testToString() {
-        Door door = new Door(3, 7, Color.PURPLE);
+        Door door = new Door(new GridPosition(3, 7), Color.PURPLE);
         String str = door.toString();
 
         assertTrue(str.contains("Door"));
@@ -166,8 +167,8 @@ class DoorTest {
 
     @Test
     void testEqualityWithSameCoordinatesAndColor() {
-        Door door1 = new Door(5, 5, Color.RED);
-        Door door2 = new Door(5, 5, Color.RED);
+        Door door1 = new Door(new GridPosition(5, 5), Color.RED);
+        Door door2 = new Door(new GridPosition(5, 5), Color.RED);
 
         assertEquals(door1, door2);
         assertEquals(door1.hashCode(), door2.hashCode());
@@ -175,16 +176,16 @@ class DoorTest {
 
     @Test
     void testInequalityWithDifferentCoordinates() {
-        Door door1 = new Door(5, 5, Color.RED);
-        Door door2 = new Door(6, 5, Color.RED);
+        Door door1 = new Door(new GridPosition(5, 5), Color.RED);
+        Door door2 = new Door(new GridPosition(6, 5), Color.RED);
 
         assertNotEquals(door1, door2);
     }
 
     @Test
     void testInequalityWithDifferentColors() {
-        Door door1 = new Door(5, 5, Color.RED);
-        Door door2 = new Door(5, 5, Color.BLUE);
+        Door door1 = new Door(new GridPosition(5, 5), Color.RED);
+        Door door2 = new Door(new GridPosition(5, 5), Color.BLUE);
 
         // Even though position is the same, color is not
         // The equality is based on Entity (which uses position only)

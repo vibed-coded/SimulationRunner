@@ -1,6 +1,7 @@
 package com.simulationrunner.entity;
 
 import com.simulationrunner.ColorPalette;
+import com.simulationrunner.GridPosition;
 import com.simulationrunner.config.GridConfig;
 import javafx.scene.paint.Color;
 import org.junit.jupiter.api.RepeatedTest;
@@ -14,7 +15,7 @@ class KeyTest {
 
     @Test
     void testConstructorWithValidCoordinates() {
-        Key key = new Key(5, 7, Color.GOLD);
+        Key key = new Key(new GridPosition(5, 7), Color.GOLD);
         assertEquals(5, key.getGridX());
         assertEquals(7, key.getGridY());
         assertFalse(key.isCollected());
@@ -22,29 +23,29 @@ class KeyTest {
 
     @Test
     void testConstructorWithNegativeX() {
-        assertThrows(IllegalArgumentException.class, () -> new Key(-1, 5, Color.GOLD));
+        assertThrows(IllegalArgumentException.class, () -> new Key(new GridPosition(-1, 5), Color.GOLD));
     }
 
     @Test
     void testConstructorWithNegativeY() {
-        assertThrows(IllegalArgumentException.class, () -> new Key(5, -1, Color.GOLD));
+        assertThrows(IllegalArgumentException.class, () -> new Key(new GridPosition(5, -1), Color.GOLD));
     }
 
     @Test
     void testConstructorWithBothNegative() {
-        assertThrows(IllegalArgumentException.class, () -> new Key(-1, -1, Color.GOLD));
+        assertThrows(IllegalArgumentException.class, () -> new Key(new GridPosition(-1, -1), Color.GOLD));
     }
 
     @Test
     void testConstructorWithZeroCoordinates() {
-        Key key = new Key(0, 0, Color.GOLD);
+        Key key = new Key(new GridPosition(0, 0), Color.GOLD);
         assertEquals(0, key.getGridX());
         assertEquals(0, key.getGridY());
     }
 
     @Test
     void testCollectChangesState() {
-        Key key = new Key(3, 4, Color.GOLD);
+        Key key = new Key(new GridPosition(3, 4), Color.GOLD);
         assertFalse(key.isCollected());
 
         key.collect();
@@ -53,7 +54,7 @@ class KeyTest {
 
     @Test
     void testCollectIsIdempotent() {
-        Key key = new Key(3, 4, Color.GOLD);
+        Key key = new Key(new GridPosition(3, 4), Color.GOLD);
 
         key.collect();
         assertTrue(key.isCollected());
@@ -64,7 +65,7 @@ class KeyTest {
 
     @Test
     void testCreateRandomKeysWithNullConfig() {
-        Player player = new Player(5, 5);
+        Player player = new Player(new GridPosition(5, 5));
         assertThrows(NullPointerException.class, () -> Key.createRandomKeys(null, player, 1));
     }
 
@@ -77,14 +78,14 @@ class KeyTest {
     @Test
     void testCreateRandomKeysWithNegativeCount() {
         GridConfig config = new GridConfig(10, 10, 50);
-        Player player = new Player(5, 5);
+        Player player = new Player(new GridPosition(5, 5));
         assertThrows(IllegalArgumentException.class, () -> Key.createRandomKeys(config, player, -1));
     }
 
     @Test
     void testCreateRandomKeysWithZeroCount() {
         GridConfig config = new GridConfig(10, 10, 50);
-        Player player = new Player(5, 5);
+        Player player = new Player(new GridPosition(5, 5));
         List<Key> keys = Key.createRandomKeys(config, player, 0);
         assertNotNull(keys);
         assertEquals(0, keys.size());
@@ -93,7 +94,7 @@ class KeyTest {
     @Test
     void testCreateRandomKeysWithSingleKey() {
         GridConfig config = new GridConfig(20, 20, 50);
-        Player player = new Player(10, 10);
+        Player player = new Player(new GridPosition(10, 10));
         List<Key> keys = Key.createRandomKeys(config, player, 1);
 
         assertNotNull(keys);
@@ -105,7 +106,7 @@ class KeyTest {
     @Test
     void testCreateRandomKeysWithMultipleKeys() {
         GridConfig config = new GridConfig(20, 20, 50);
-        Player player = new Player(10, 10);
+        Player player = new Player(new GridPosition(10, 10));
         List<Key> keys = Key.createRandomKeys(config, player, 5);
 
         assertNotNull(keys);
@@ -120,7 +121,7 @@ class KeyTest {
     @RepeatedTest(50)
     void testCreateRandomKeysWithinBounds() {
         GridConfig config = new GridConfig(20, 20, 50);
-        Player player = new Player(10, 10);
+        Player player = new Player(new GridPosition(10, 10));
         List<Key> keys = Key.createRandomKeys(config, player, 3);
 
         for (Key key : keys) {
@@ -134,7 +135,7 @@ class KeyTest {
     @RepeatedTest(50)
     void testCreateRandomKeysMinimumDistanceFromPlayer() {
         GridConfig config = new GridConfig(20, 20, 50);
-        Player player = new Player(10, 10);
+        Player player = new Player(new GridPosition(10, 10));
         List<Key> keys = Key.createRandomKeys(config, player, 3);
 
         for (Key key : keys) {
@@ -152,7 +153,7 @@ class KeyTest {
     void testCreateRandomKeysOnSmallGrid() {
         // 5x5 grid where 5-tile distance is impossible from center
         GridConfig config = new GridConfig(5, 5, 50);
-        Player player = new Player(2, 2);
+        Player player = new Player(new GridPosition(2, 2));
 
         // Should not throw exception even though constraint cannot be satisfied
         assertDoesNotThrow(() -> {
@@ -166,7 +167,7 @@ class KeyTest {
     void testCreateRandomKeysOnVerySmallGrid() {
         // 3x3 grid where 5-tile distance is definitely impossible
         GridConfig config = new GridConfig(3, 3, 50);
-        Player player = new Player(1, 1);
+        Player player = new Player(new GridPosition(1, 1));
 
         List<Key> keys = Key.createRandomKeys(config, player, 2);
         assertNotNull(keys);
@@ -182,7 +183,7 @@ class KeyTest {
     @Test
     void testCreateRandomKeysOnLargeGrid() {
         GridConfig config = new GridConfig(50, 50, 50);
-        Player player = new Player(25, 25);
+        Player player = new Player(new GridPosition(25, 25));
         List<Key> keys = Key.createRandomKeys(config, player, 10);
 
         assertNotNull(keys);
@@ -198,9 +199,9 @@ class KeyTest {
 
     @Test
     void testEquals() {
-        Key key1 = new Key(5, 7, Color.GOLD);
-        Key key2 = new Key(5, 7, Color.GOLD);
-        Key key3 = new Key(5, 8, Color.GOLD);
+        Key key1 = new Key(new GridPosition(5, 7), Color.GOLD);
+        Key key2 = new Key(new GridPosition(5, 7), Color.GOLD);
+        Key key3 = new Key(new GridPosition(5, 8), Color.GOLD);
 
         assertEquals(key1, key2);
         assertNotEquals(key1, key3);
@@ -208,33 +209,33 @@ class KeyTest {
 
     @Test
     void testEqualsSameObject() {
-        Key key = new Key(5, 7, Color.GOLD);
+        Key key = new Key(new GridPosition(5, 7), Color.GOLD);
         assertEquals(key, key);
     }
 
     @Test
     void testEqualsWithNull() {
-        Key key = new Key(5, 7, Color.GOLD);
+        Key key = new Key(new GridPosition(5, 7), Color.GOLD);
         assertNotEquals(key, null);
     }
 
     @Test
     void testEqualsWithDifferentClass() {
-        Key key = new Key(5, 7, Color.GOLD);
+        Key key = new Key(new GridPosition(5, 7), Color.GOLD);
         assertNotEquals(key, "not a key");
     }
 
     @Test
     void testHashCode() {
-        Key key1 = new Key(5, 7, Color.GOLD);
-        Key key2 = new Key(5, 7, Color.GOLD);
+        Key key1 = new Key(new GridPosition(5, 7), Color.GOLD);
+        Key key2 = new Key(new GridPosition(5, 7), Color.GOLD);
 
         assertEquals(key1.hashCode(), key2.hashCode());
     }
 
     @Test
     void testToString() {
-        Key key = new Key(5, 7, Color.GOLD);
+        Key key = new Key(new GridPosition(5, 7), Color.GOLD);
         String str = key.toString();
 
         assertNotNull(str);
@@ -247,7 +248,7 @@ class KeyTest {
 
     @Test
     void testToStringAfterCollect() {
-        Key key = new Key(5, 7, Color.GOLD);
+        Key key = new Key(new GridPosition(5, 7), Color.GOLD);
         key.collect();
         String str = key.toString();
 
@@ -261,7 +262,7 @@ class KeyTest {
 
     @Test
     void testRenderWithNullGraphicsContext() {
-        Key key = new Key(5, 7, Color.GOLD);
+        Key key = new Key(new GridPosition(5, 7), Color.GOLD);
         GridConfig config = new GridConfig(10, 10, 50);
 
         assertThrows(NullPointerException.class, () -> key.render(null, config));
@@ -269,14 +270,14 @@ class KeyTest {
 
     @Test
     void testRenderWithNullConfig() {
-        Key key = new Key(5, 7, Color.GOLD);
+        Key key = new Key(new GridPosition(5, 7), Color.GOLD);
 
         assertThrows(NullPointerException.class, () -> key.render(null, null));
     }
 
     @Test
     void testConstructorWithColor() {
-        Key key = new Key(5, 7, Color.RED);
+        Key key = new Key(new GridPosition(5, 7), Color.RED);
         assertEquals(5, key.getGridX());
         assertEquals(7, key.getGridY());
         assertEquals(Color.RED, key.getColor());
@@ -285,13 +286,13 @@ class KeyTest {
 
     @Test
     void testConstructorWithNullColor() {
-        assertThrows(NullPointerException.class, () -> new Key(5, 7, null));
+        assertThrows(NullPointerException.class, () -> new Key(new GridPosition(5, 7), null));
     }
 
     @Test
     void testGetColor() {
-        Key redKey = new Key(0, 0, Color.RED);
-        Key blueKey = new Key(1, 1, Color.BLUE);
+        Key redKey = new Key(new GridPosition(0, 0), Color.RED);
+        Key blueKey = new Key(new GridPosition(1, 1), Color.BLUE);
 
         assertEquals(Color.RED, redKey.getColor());
         assertEquals(Color.BLUE, blueKey.getColor());
@@ -300,7 +301,7 @@ class KeyTest {
     @Test
     void testCreateRandomKeysAssignsUniqueColors() {
         GridConfig config = new GridConfig(20, 20, 50);
-        Player player = new Player(10, 10);
+        Player player = new Player(new GridPosition(10, 10));
         List<Key> keys = Key.createRandomKeys(config, player, 5);
 
         assertEquals(5, keys.size());
@@ -316,7 +317,7 @@ class KeyTest {
     @Test
     void testCreateRandomKeysColorsCycleAfterPaletteSize() {
         GridConfig config = new GridConfig(50, 50, 50);
-        Player player = new Player(25, 25);
+        Player player = new Player(new GridPosition(25, 25));
         int paletteSize = ColorPalette.getPaletteSize();
 
         // Create more keys than palette size

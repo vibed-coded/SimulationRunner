@@ -1,5 +1,6 @@
 package com.simulationrunner.entity;
 
+import com.simulationrunner.GridPosition;
 import com.simulationrunner.config.GridConfig;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -21,14 +22,12 @@ public class Door extends Entity {
     /**
      * Creates a new door at the specified grid position with the specified color.
      *
-     * @param gridX the X coordinate on the grid
-     * @param gridY the Y coordinate on the grid
+     * @param position the position on the grid
      * @param color the color of this door (must match key color to pass)
-     * @throws IllegalArgumentException if coordinates are negative
-     * @throws NullPointerException if color is null
+     * @throws NullPointerException if position or color is null
      */
-    public Door(int gridX, int gridY, Color color) {
-        super(gridX, gridY);
+    public Door(GridPosition position, Color color) {
+        super(position);
         Objects.requireNonNull(color, "Color cannot be null");
         this.color = color;
     }
@@ -55,11 +54,12 @@ public class Door extends Entity {
         for (int attempt = 0; attempt < MAX_SPAWN_ATTEMPTS; attempt++) {
             int x = RANDOM.nextInt(config.getGridWidth());
             int y = RANDOM.nextInt(config.getGridHeight());
+            GridPosition candidatePosition = new GridPosition(x, y);
 
-            int distance = manhattanDistance(x, y, player.getGridX(), player.getGridY());
+            int distance = candidatePosition.manhattanDistance(player.getPosition());
 
             if (distance >= MIN_SPAWN_DISTANCE) {
-                return new Door(x, y, color);
+                return new Door(candidatePosition, color);
             }
         }
 
@@ -73,22 +73,21 @@ public class Door extends Entity {
      */
     private static Door createFarthest(GridConfig config, Player player, Color color) {
         int maxDistance = -1;
-        int bestX = 0;
-        int bestY = 0;
+        GridPosition bestPosition = new GridPosition(0, 0);
 
         // Sample grid positions to find the farthest one
         for (int x = 0; x < config.getGridWidth(); x++) {
             for (int y = 0; y < config.getGridHeight(); y++) {
-                int distance = manhattanDistance(x, y, player.getGridX(), player.getGridY());
+                GridPosition candidatePosition = new GridPosition(x, y);
+                int distance = candidatePosition.manhattanDistance(player.getPosition());
                 if (distance > maxDistance) {
                     maxDistance = distance;
-                    bestX = x;
-                    bestY = y;
+                    bestPosition = candidatePosition;
                 }
             }
         }
 
-        return new Door(bestX, bestY, color);
+        return new Door(bestPosition, color);
     }
 
     /**
@@ -121,8 +120,8 @@ public class Door extends Entity {
         int cellSize = config.getCellSize();
 
         // Calculate pixel position of cell center
-        double centerX = (gridX * cellSize) + (cellSize / 2.0);
-        double centerY = (gridY * cellSize) + (cellSize / 2.0);
+        double centerX = (position.x() * cellSize) + (cellSize / 2.0);
+        double centerY = (position.y() * cellSize) + (cellSize / 2.0);
 
         // Calculate door dimensions
         double doorWidth = cellSize * DOOR_WIDTH_RATIO;
@@ -140,6 +139,6 @@ public class Door extends Entity {
 
     @Override
     public String toString() {
-        return "Door[gridX=" + gridX + ", gridY=" + gridY + ", color=" + color + "]";
+        return "Door[position=" + position + ", color=" + color + "]";
     }
 }
