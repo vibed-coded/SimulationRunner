@@ -14,7 +14,7 @@ import java.util.random.RandomGenerator;
  */
 public class Door extends Entity {
     private static final double DOOR_WIDTH_RATIO = 0.5;
-    private static final double DOOR_HEIGHT_RATIO = 0.8;
+    private static final double DOOR_HEIGHT_RATIO = 1.0; // Full cell height
     private static final RandomGenerator RANDOM = RandomGenerator.getDefault();
 
     private final Color color;

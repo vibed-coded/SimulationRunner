@@ -45,10 +45,10 @@ public class App extends Application {
         // Add keyboard event handler for WASD controls
         scene.setOnKeyPressed(event -> {
             switch (event.getCode()) {
-                case W -> grid.getPlayer().move(0, -1, config, grid.getDoor());  // Up
-                case A -> grid.getPlayer().move(-1, 0, config, grid.getDoor());  // Left
-                case S -> grid.getPlayer().move(0, 1, config, grid.getDoor());   // Down
-                case D -> grid.getPlayer().move(1, 0, config, grid.getDoor());   // Right
+                case W -> grid.getPlayer().move(0, -1, config, grid.getDoor(), grid.getWalls());  // Up
+                case A -> grid.getPlayer().move(-1, 0, config, grid.getDoor(), grid.getWalls());  // Left
+                case S -> grid.getPlayer().move(0, 1, config, grid.getDoor(), grid.getWalls());   // Down
+                case D -> grid.getPlayer().move(1, 0, config, grid.getDoor(), grid.getWalls());   // Right
             }
             checkKeyPickup(); // Check for key collection after movement
             render(); // Redraw after movement
@@ -87,6 +87,11 @@ public class App extends Application {
 
         for (int y = 0; y <= gridPixelHeight; y += cellSize) {
             gc.strokeLine(0, y, width, y);
+        }
+
+        // Render all walls first (behind other entities)
+        for (var wall : grid.getWalls()) {
+            wall.render(gc, config);
         }
 
         // Render all keys

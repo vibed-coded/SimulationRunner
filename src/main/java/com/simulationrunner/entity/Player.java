@@ -74,15 +74,16 @@ public class Player extends Entity {
 
     /**
      * Moves the player by the specified delta if the new position is within bounds
-     * and not blocked by a door the player cannot pass through.
+     * and not blocked by a door the player cannot pass through or a wall.
      *
      * @param deltaX the change in X coordinate
      * @param deltaY the change in Y coordinate
      * @param config the grid configuration for boundary checking
      * @param door the door to check for collision (null if no door)
+     * @param walls the list of walls to check for collision (null or empty if no walls)
      * @throws NullPointerException if config is null
      */
-    public void move(int deltaX, int deltaY, GridConfig config, Door door) {
+    public void move(int deltaX, int deltaY, GridConfig config, Door door, java.util.List<Wall> walls) {
         Objects.requireNonNull(config, "GridConfig cannot be null");
 
         try {
@@ -92,6 +93,15 @@ public class Player extends Entity {
             if (newPosition.x() < 0 || newPosition.x() >= config.getGridWidth() ||
                 newPosition.y() < 0 || newPosition.y() >= config.getGridHeight()) {
                 return; // Out of bounds, don't move
+            }
+
+            // Check if there's a wall at the new position
+            if (walls != null) {
+                for (Wall wall : walls) {
+                    if (wall.getPosition().isSameAs(newPosition)) {
+                        return; // Wall blocks movement, don't move
+                    }
+                }
             }
 
             // Check if there's a door at the new position
