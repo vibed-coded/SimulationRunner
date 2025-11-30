@@ -45,6 +45,10 @@ public class GridConfig {
         return gridHeight * cellSize;
     }
 
+    public int getPixelHeightWithHUD(int hudHeight) {
+        return getPixelHeight() + hudHeight;
+    }
+
     @Override
     public String toString() {
         return String.format("GridConfig[width=%d, height=%d, cellSize=%d]",

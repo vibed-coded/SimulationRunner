@@ -98,3 +98,4 @@ SimulationRunner - A 2D grid-based game where a player entity can move around a 
 5. **Record to Class Conversion**: Player was originally a Java record but converted to mutable class because records are immutable and cannot support changing state needed for movement.
 6. **Entity Self-Rendering**: Each entity implements its own render() method rather than centralized rendering logic, allowing entity-specific rendering behavior.
 7. **Manual Render Triggers**: Render is called explicitly after state changes rather than continuous game loop, suitable for turn-based/event-driven game.
+- Do not generate code during planning that is not the point. The LLM is just wasting tokens since it is duplicate generation.

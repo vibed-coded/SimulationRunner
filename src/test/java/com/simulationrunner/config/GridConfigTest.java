@@ -73,4 +73,19 @@ class GridConfigTest {
         assertTrue(result.contains("height=10"));
         assertTrue(result.contains("cellSize=10"));
     }
+
+    @Test
+    void testGetPixelHeightWithHUD() {
+        GridConfig config = new GridConfig(10, 10, 50);
+        int heightWithHUD = config.getPixelHeightWithHUD(10);
+        assertEquals(510, heightWithHUD);
+    }
+
+    @Test
+    void testGetPixelHeightWithHUDDoesNotModifyOriginalHeight() {
+        GridConfig config = new GridConfig(10, 10, 50);
+        int originalHeight = config.getPixelHeight();
+        config.getPixelHeightWithHUD(10);
+        assertEquals(originalHeight, config.getPixelHeight());
+    }
 }
