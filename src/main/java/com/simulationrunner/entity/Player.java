@@ -11,12 +11,9 @@ import java.util.random.RandomGenerator;
  * Represents a player entity on the grid.
  * The player spawns at a random grid location and is rendered as a blue circle.
  */
-public class Player {
+public class Player extends Entity {
     private static final double CIRCLE_SIZE_RATIO = 0.6;
     private static final RandomGenerator RANDOM = RandomGenerator.getDefault();
-
-    private int gridX;
-    private int gridY;
 
     /**
      * Creates a new player at the specified grid position.
@@ -26,14 +23,7 @@ public class Player {
      * @throws IllegalArgumentException if coordinates are negative
      */
     public Player(int gridX, int gridY) {
-        if (gridX < 0) {
-            throw new IllegalArgumentException("gridX must be non-negative");
-        }
-        if (gridY < 0) {
-            throw new IllegalArgumentException("gridY must be non-negative");
-        }
-        this.gridX = gridX;
-        this.gridY = gridY;
+        super(gridX, gridY);
     }
 
     /**
@@ -49,24 +39,6 @@ public class Player {
         int x = RANDOM.nextInt(config.getGridWidth());
         int y = RANDOM.nextInt(config.getGridHeight());
         return new Player(x, y);
-    }
-
-    /**
-     * Gets the X coordinate on the grid.
-     *
-     * @return the grid X coordinate
-     */
-    public int getGridX() {
-        return gridX;
-    }
-
-    /**
-     * Gets the Y coordinate on the grid.
-     *
-     * @return the grid Y coordinate
-     */
-    public int getGridY() {
-        return gridY;
     }
 
     /**
@@ -91,13 +63,7 @@ public class Player {
         }
     }
 
-    /**
-     * Renders the player on the canvas as a blue circle centered in its grid cell.
-     *
-     * @param gc the graphics context to draw on
-     * @param config the grid configuration for pixel calculations
-     * @throws NullPointerException if gc or config is null
-     */
+    @Override
     public void render(GraphicsContext gc, GridConfig config) {
         Objects.requireNonNull(gc, "GraphicsContext cannot be null");
         Objects.requireNonNull(config, "GridConfig cannot be null");
@@ -117,21 +83,4 @@ public class Player {
         gc.fillOval(centerX - radius, centerY - radius, diameter, diameter);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Player player = (Player) obj;
-        return gridX == player.gridX && gridY == player.gridY;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(gridX, gridY);
-    }
-
-    @Override
-    public String toString() {
-        return "Player[gridX=" + gridX + ", gridY=" + gridY + "]";
-    }
 }

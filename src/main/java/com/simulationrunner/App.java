@@ -1,6 +1,7 @@
 package com.simulationrunner;
 
 import com.simulationrunner.config.GridConfig;
+import com.simulationrunner.entity.Key;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -24,7 +25,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         config = new GridConfig(10, 10, 50);
-        grid = new Grid(config);
+        grid = new Grid(config, 3); // Create grid with 3 keys
 
         width = config.getPixelWidth();
         height = config.getPixelHeight();
@@ -46,12 +47,25 @@ public class App extends Application {
                 case S -> grid.getPlayer().move(0, 1, config);   // Down
                 case D -> grid.getPlayer().move(1, 0, config);   // Right
             }
+            checkKeyPickup(); // Check for key collection after movement
             render(); // Redraw after movement
         });
 
         stage.setScene(scene);
         stage.setTitle("SimulationRunner");
         stage.show();
+    }
+
+    private void checkKeyPickup() {
+        var player = grid.getPlayer();
+
+        for (Key key : grid.getKeys()) {
+            if (!key.isCollected() &&
+                player.getGridX() == key.getGridX() &&
+                player.getGridY() == key.getGridY()) {
+                key.collect();
+            }
+        }
     }
 
     private void render() {
@@ -68,6 +82,11 @@ public class App extends Application {
 
         for (int y = 0; y <= height; y += cellSize) {
             gc.strokeLine(0, y, width, y);
+        }
+
+        // Render all keys
+        for (Key key : grid.getKeys()) {
+            key.render(gc, config);
         }
 
         // Render the player
