@@ -38,6 +38,9 @@ public class App extends Application {
             gc.strokeLine(0, y, width, y);
         }
 
+        // Render the player
+        grid.getPlayer().render(gc, config);
+
         var scene = new Scene(new StackPane(canvas), width, height);
         stage.setScene(scene);
         stage.setTitle("SimulationRunner");
