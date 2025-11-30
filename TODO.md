@@ -15,16 +15,16 @@
   - [x] Draws a blue circle at 60% of cell size
   - [x] Centers circle in the grid cell
 
-### 2. Update Grid Class
-- [ ] Add `private final Player player` field to `Grid.java`
-- [ ] Initialize player in Grid constructor: `this.player = new Player(config)`
-- [ ] Add `getPlayer()` getter method
-- [ ] Update Grid constructor to pass config to Player
+### 2. Update Grid Class ✅
+- [x] Add `private final Player player` field to `Grid.java`
+- [x] Initialize player in Grid constructor: `this.player = Player.createRandom(config)`
+- [x] Add `getPlayer()` getter method
+- [x] Import Player entity class
 
-### 3. Update App Class
-- [ ] After grid line rendering, add player rendering
-- [ ] Call `grid.getPlayer().render(gc, config)` to draw the player
-- [ ] Ensure player renders on top of grid lines
+### 3. Update App Class ✅
+- [x] After grid line rendering, add player rendering
+- [x] Call `grid.getPlayer().render(gc, config)` to draw the player
+- [x] Ensure player renders on top of grid lines
 
 ### 4. Write Unit Tests
 - [ ] Create `src/test/java/com/simulationrunner/entity/` directory
@@ -34,15 +34,15 @@
 - [ ] Test: Constructor with different grid sizes
 - [ ] Test: Verify random spawn distribution (optional)
 
-### 5. Testing & Validation
-- [ ] Run all tests: `./mvnw test`
-- [ ] Build project: `./mvnw clean package`
-- [ ] Run application: `./mvnw javafx:run`
-- [ ] Visual verification:
-  - [ ] Blue circle appears on the grid
-  - [ ] Circle is centered in a grid cell
-  - [ ] Circle size is approximately 60% of cell size
-  - [ ] Each run spawns player at different random location
+### 5. Testing & Validation ✅
+- [x] Run all tests: `./mvnw test` (7 tests passed)
+- [x] Build project: `./mvnw clean package`
+- [x] Run application: `./mvnw javafx:run`
+- [x] Visual verification:
+  - [x] Blue circle appears on the grid
+  - [x] Circle is centered in a grid cell
+  - [x] Circle size is approximately 60% of cell size
+  - [x] Each run spawns player at different random location
 
 ## Technical Details
 
