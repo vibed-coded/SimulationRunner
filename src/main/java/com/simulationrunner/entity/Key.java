@@ -1,5 +1,6 @@
 package com.simulationrunner.entity;
 
+import com.simulationrunner.ColorPalette;
 import com.simulationrunner.config.GridConfig;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -19,28 +20,34 @@ public class Key extends Entity {
     private static final int MAX_SPAWN_ATTEMPTS = 1000;
     private static final RandomGenerator RANDOM = RandomGenerator.getDefault();
 
+    private final Color color;
     private boolean collected;
 
     /**
-     * Creates a new key at the specified grid position.
+     * Creates a new key at the specified grid position with the specified color.
      *
      * @param gridX the X coordinate on the grid
      * @param gridY the Y coordinate on the grid
+     * @param color the color of this key
      * @throws IllegalArgumentException if coordinates are negative
+     * @throws NullPointerException if color is null
      */
-    public Key(int gridX, int gridY) {
+    public Key(int gridX, int gridY, Color color) {
         super(gridX, gridY);
+        Objects.requireNonNull(color, "Color cannot be null");
+        this.color = color;
         this.collected = false;
     }
 
     /**
      * Creates a list of keys at random positions on the grid.
      * Each key will spawn at least 5 tiles away from the player (Manhattan distance).
+     * Keys are assigned unique colors from the rainbow palette, cycling if needed.
      *
      * @param config the grid configuration
      * @param player the player entity to maintain distance from
      * @param count the number of keys to create
-     * @return a list of randomly positioned keys
+     * @return a list of randomly positioned keys with unique colors
      * @throws NullPointerException if config or player is null
      * @throws IllegalArgumentException if count is negative
      */
@@ -54,7 +61,8 @@ public class Key extends Entity {
         List<Key> keys = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++) {
-            Key key = createSingleKey(config, player);
+            Color keyColor = ColorPalette.getKeyColor(i);
+            Key key = createSingleKey(config, player, keyColor);
             keys.add(key);
         }
 
@@ -64,7 +72,7 @@ public class Key extends Entity {
     /**
      * Creates a single key at a random position, maintaining minimum distance from player.
      */
-    private static Key createSingleKey(GridConfig config, Player player) {
+    private static Key createSingleKey(GridConfig config, Player player, Color color) {
         // Try to find a position at least MIN_SPAWN_DISTANCE away from player
         for (int attempt = 0; attempt < MAX_SPAWN_ATTEMPTS; attempt++) {
             int x = RANDOM.nextInt(config.getGridWidth());
@@ -73,19 +81,19 @@ public class Key extends Entity {
             int distance = manhattanDistance(x, y, player.getGridX(), player.getGridY());
 
             if (distance >= MIN_SPAWN_DISTANCE) {
-                return new Key(x, y);
+                return new Key(x, y, color);
             }
         }
 
         // Fallback: if we couldn't find a valid position, place at farthest point from player
-        return createFarthestKey(config, player);
+        return createFarthestKey(config, player, color);
     }
 
     /**
      * Creates a key at the farthest possible position from the player.
      * Used as fallback for small grids where minimum distance cannot be satisfied.
      */
-    private static Key createFarthestKey(GridConfig config, Player player) {
+    private static Key createFarthestKey(GridConfig config, Player player, Color color) {
         int maxDistance = -1;
         int bestX = 0;
         int bestY = 0;
@@ -102,7 +110,7 @@ public class Key extends Entity {
             }
         }
 
-        return new Key(bestX, bestY);
+        return new Key(bestX, bestY, color);
     }
 
     /**
@@ -119,6 +127,15 @@ public class Key extends Entity {
      */
     public boolean isCollected() {
         return collected;
+    }
+
+    /**
+     * Gets the color of this key.
+     *
+     * @return the key's color
+     */
+    public Color getColor() {
+        return color;
     }
 
     @Override
@@ -139,13 +156,14 @@ public class Key extends Entity {
         // Calculate rectangle size
         double rectSize = cellSize * RECTANGLE_SIZE_RATIO;
 
-        // Draw filled gold rectangle centered in the cell
-        gc.setFill(Color.GOLD);
+        // Draw filled rectangle centered in the cell
+        gc.setFill(color);
         gc.fillRect(centerX - rectSize / 2, centerY - rectSize / 2, rectSize, rectSize);
     }
 
     @Override
     public String toString() {
-        return "Key[gridX=" + gridX + ", gridY=" + gridY + ", collected=" + collected + "]";
+        return "Key[gridX=" + gridX + ", gridY=" + gridY +
+               ", color=" + color + ", collected=" + collected + "]";
     }
 }

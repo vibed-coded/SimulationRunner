@@ -4,6 +4,7 @@ import com.simulationrunner.config.GridConfig;
 import com.simulationrunner.entity.Key;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -58,9 +59,9 @@ class HUDTest {
         GridConfig config = new GridConfig(10, 10, 50);
 
         List<Key> keys = new ArrayList<>();
-        keys.add(new Key(0, 0));
-        keys.add(new Key(1, 1));
-        keys.add(new Key(2, 2));
+        keys.add(new Key(0, 0, Color.GOLD));
+        keys.add(new Key(1, 1, Color.GOLD));
+        keys.add(new Key(2, 2, Color.GOLD));
 
         assertDoesNotThrow(() -> hud.render(gc, config, keys));
     }
@@ -73,9 +74,9 @@ class HUDTest {
         GridConfig config = new GridConfig(10, 10, 50);
 
         List<Key> keys = new ArrayList<>();
-        Key key1 = new Key(0, 0);
-        Key key2 = new Key(1, 1);
-        Key key3 = new Key(2, 2);
+        Key key1 = new Key(0, 0, Color.GOLD);
+        Key key2 = new Key(1, 1, Color.GOLD);
+        Key key3 = new Key(2, 2, Color.GOLD);
         key1.collect();
         key2.collect();
         key3.collect();
@@ -94,15 +95,31 @@ class HUDTest {
         GridConfig config = new GridConfig(10, 10, 50);
 
         List<Key> keys = new ArrayList<>();
-        Key key1 = new Key(0, 0);
-        Key key2 = new Key(1, 1);
-        Key key3 = new Key(2, 2);
+        Key key1 = new Key(0, 0, Color.GOLD);
+        Key key2 = new Key(1, 1, Color.GOLD);
+        Key key3 = new Key(2, 2, Color.GOLD);
         key1.collect();
         key2.collect();
         keys.add(key1);
         keys.add(key2);
         keys.add(key3);
 
+        assertDoesNotThrow(() -> hud.render(gc, config, keys));
+    }
+
+    @Test
+    void testRenderWithDifferentColoredKeys() {
+        HUD hud = new HUD();
+        Canvas canvas = new Canvas(500, 510);
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        GridConfig config = new GridConfig(10, 10, 50);
+
+        List<Key> keys = new ArrayList<>();
+        keys.add(new Key(0, 0, Color.RED));
+        keys.add(new Key(1, 1, Color.BLUE));
+        keys.add(new Key(2, 2, Color.GREEN));
+
+        // Should not throw - tests that different colors render correctly
         assertDoesNotThrow(() -> hud.render(gc, config, keys));
     }
 }

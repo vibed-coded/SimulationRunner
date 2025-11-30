@@ -1,6 +1,8 @@
 package com.simulationrunner.entity;
 
+import com.simulationrunner.ColorPalette;
 import com.simulationrunner.config.GridConfig;
+import javafx.scene.paint.Color;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +14,7 @@ class KeyTest {
 
     @Test
     void testConstructorWithValidCoordinates() {
-        Key key = new Key(5, 7);
+        Key key = new Key(5, 7, Color.GOLD);
         assertEquals(5, key.getGridX());
         assertEquals(7, key.getGridY());
         assertFalse(key.isCollected());
@@ -20,29 +22,29 @@ class KeyTest {
 
     @Test
     void testConstructorWithNegativeX() {
-        assertThrows(IllegalArgumentException.class, () -> new Key(-1, 5));
+        assertThrows(IllegalArgumentException.class, () -> new Key(-1, 5, Color.GOLD));
     }
 
     @Test
     void testConstructorWithNegativeY() {
-        assertThrows(IllegalArgumentException.class, () -> new Key(5, -1));
+        assertThrows(IllegalArgumentException.class, () -> new Key(5, -1, Color.GOLD));
     }
 
     @Test
     void testConstructorWithBothNegative() {
-        assertThrows(IllegalArgumentException.class, () -> new Key(-1, -1));
+        assertThrows(IllegalArgumentException.class, () -> new Key(-1, -1, Color.GOLD));
     }
 
     @Test
     void testConstructorWithZeroCoordinates() {
-        Key key = new Key(0, 0);
+        Key key = new Key(0, 0, Color.GOLD);
         assertEquals(0, key.getGridX());
         assertEquals(0, key.getGridY());
     }
 
     @Test
     void testCollectChangesState() {
-        Key key = new Key(3, 4);
+        Key key = new Key(3, 4, Color.GOLD);
         assertFalse(key.isCollected());
 
         key.collect();
@@ -51,7 +53,7 @@ class KeyTest {
 
     @Test
     void testCollectIsIdempotent() {
-        Key key = new Key(3, 4);
+        Key key = new Key(3, 4, Color.GOLD);
 
         key.collect();
         assertTrue(key.isCollected());
@@ -196,9 +198,9 @@ class KeyTest {
 
     @Test
     void testEquals() {
-        Key key1 = new Key(5, 7);
-        Key key2 = new Key(5, 7);
-        Key key3 = new Key(5, 8);
+        Key key1 = new Key(5, 7, Color.GOLD);
+        Key key2 = new Key(5, 7, Color.GOLD);
+        Key key3 = new Key(5, 8, Color.GOLD);
 
         assertEquals(key1, key2);
         assertNotEquals(key1, key3);
@@ -206,58 +208,60 @@ class KeyTest {
 
     @Test
     void testEqualsSameObject() {
-        Key key = new Key(5, 7);
+        Key key = new Key(5, 7, Color.GOLD);
         assertEquals(key, key);
     }
 
     @Test
     void testEqualsWithNull() {
-        Key key = new Key(5, 7);
+        Key key = new Key(5, 7, Color.GOLD);
         assertNotEquals(key, null);
     }
 
     @Test
     void testEqualsWithDifferentClass() {
-        Key key = new Key(5, 7);
+        Key key = new Key(5, 7, Color.GOLD);
         assertNotEquals(key, "not a key");
     }
 
     @Test
     void testHashCode() {
-        Key key1 = new Key(5, 7);
-        Key key2 = new Key(5, 7);
+        Key key1 = new Key(5, 7, Color.GOLD);
+        Key key2 = new Key(5, 7, Color.GOLD);
 
         assertEquals(key1.hashCode(), key2.hashCode());
     }
 
     @Test
     void testToString() {
-        Key key = new Key(5, 7);
+        Key key = new Key(5, 7, Color.GOLD);
         String str = key.toString();
 
         assertNotNull(str);
         assertTrue(str.contains("5"));
         assertTrue(str.contains("7"));
+        assertTrue(str.contains("color"));
         assertTrue(str.contains("collected"));
         assertTrue(str.contains("false"));
     }
 
     @Test
     void testToStringAfterCollect() {
-        Key key = new Key(5, 7);
+        Key key = new Key(5, 7, Color.GOLD);
         key.collect();
         String str = key.toString();
 
         assertNotNull(str);
         assertTrue(str.contains("5"));
         assertTrue(str.contains("7"));
+        assertTrue(str.contains("color"));
         assertTrue(str.contains("collected"));
         assertTrue(str.contains("true"));
     }
 
     @Test
     void testRenderWithNullGraphicsContext() {
-        Key key = new Key(5, 7);
+        Key key = new Key(5, 7, Color.GOLD);
         GridConfig config = new GridConfig(10, 10, 50);
 
         assertThrows(NullPointerException.class, () -> key.render(null, config));
@@ -265,8 +269,64 @@ class KeyTest {
 
     @Test
     void testRenderWithNullConfig() {
-        Key key = new Key(5, 7);
+        Key key = new Key(5, 7, Color.GOLD);
 
         assertThrows(NullPointerException.class, () -> key.render(null, null));
+    }
+
+    @Test
+    void testConstructorWithColor() {
+        Key key = new Key(5, 7, Color.RED);
+        assertEquals(5, key.getGridX());
+        assertEquals(7, key.getGridY());
+        assertEquals(Color.RED, key.getColor());
+        assertFalse(key.isCollected());
+    }
+
+    @Test
+    void testConstructorWithNullColor() {
+        assertThrows(NullPointerException.class, () -> new Key(5, 7, null));
+    }
+
+    @Test
+    void testGetColor() {
+        Key redKey = new Key(0, 0, Color.RED);
+        Key blueKey = new Key(1, 1, Color.BLUE);
+
+        assertEquals(Color.RED, redKey.getColor());
+        assertEquals(Color.BLUE, blueKey.getColor());
+    }
+
+    @Test
+    void testCreateRandomKeysAssignsUniqueColors() {
+        GridConfig config = new GridConfig(20, 20, 50);
+        Player player = new Player(10, 10);
+        List<Key> keys = Key.createRandomKeys(config, player, 5);
+
+        assertEquals(5, keys.size());
+
+        // First 5 keys should have first 5 palette colors
+        assertEquals(ColorPalette.getKeyColor(0), keys.get(0).getColor());
+        assertEquals(ColorPalette.getKeyColor(1), keys.get(1).getColor());
+        assertEquals(ColorPalette.getKeyColor(2), keys.get(2).getColor());
+        assertEquals(ColorPalette.getKeyColor(3), keys.get(3).getColor());
+        assertEquals(ColorPalette.getKeyColor(4), keys.get(4).getColor());
+    }
+
+    @Test
+    void testCreateRandomKeysColorsCycleAfterPaletteSize() {
+        GridConfig config = new GridConfig(50, 50, 50);
+        Player player = new Player(25, 25);
+        int paletteSize = ColorPalette.getPaletteSize();
+
+        // Create more keys than palette size
+        List<Key> keys = Key.createRandomKeys(config, player, paletteSize + 3);
+
+        assertEquals(paletteSize + 3, keys.size());
+
+        // Colors should cycle
+        assertEquals(keys.get(0).getColor(), keys.get(paletteSize).getColor());
+        assertEquals(keys.get(1).getColor(), keys.get(paletteSize + 1).getColor());
+        assertEquals(keys.get(2).getColor(), keys.get(paletteSize + 2).getColor());
     }
 }

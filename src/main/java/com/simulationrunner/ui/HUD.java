@@ -61,15 +61,13 @@ public class HUD {
     }
 
     /**
-     * Gets the color for a key. Currently returns GOLD for all keys.
-     * Will be updated when keys support individual colors.
+     * Gets the color for a key.
      *
      * @param key the key
      * @return the key's color
      */
     private Color getKeyColor(Key key) {
-        // TODO: Update when Key class has a color field
-        return Color.GOLD;
+        return key.getColor();
     }
 
     /**
