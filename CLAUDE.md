@@ -4,13 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-SimulationRunner - A 2D grid-based game where a player entity can move around a grid using keyboard controls. Currently implements core movement mechanics with plans to add key collection, door unlocking, and multiple levels. Built with JavaFX 25.0.1 and Java 25.
+SimulationRunner - A 2D grid-based game where a player entity moves around a grid collecting keys. Built with JavaFX 25.0.1 and Java 25.
 
 **Current Implementation Status:**
 - Player movement with WASD controls
+- Key collection system with multiple keys
+- HUD footer showing collected keys
+- Entity inheritance hierarchy (Player, Key extend Entity)
 - Grid rendering with configurable dimensions
 - Boundary detection and collision prevention
-- **Planned Features:** Key entity, Door entity, level system, win/lose conditions
+- **Planned Features:** Door entity, level system, win/lose conditions
 
 ## Development Commands
 
@@ -47,55 +50,64 @@ SimulationRunner - A 2D grid-based game where a player entity can move around a 
 - Cell size is configurable in pixels (default: 10px)
 
 ### Core Components
-- **App** (`com.simulationrunner.App`): Main JavaFX application entry point. Creates grid (currently hardcoded as 10x10 with 50px cells), canvas, and handles keyboard input. Renders grid using JavaFX GraphicsContext with manual render triggers (not a continuous game loop). Handles WASD keyboard events and delegates to player movement.
-- **Grid** (`com.simulationrunner.Grid`): Represents the game grid, wraps GridConfig with validation. Creates and manages the Player entity via `Player.createRandom()`.
-- **GridConfig** (`com.simulationrunner.config.GridConfig`): Immutable configuration class for grid dimensions (gridWidth, gridHeight) and cellSize. Provides computed pixel dimensions via `getPixelWidth()` and `getPixelHeight()`. Default constructor creates 10x10 grid with 10px cells.
-- **Player** (`com.simulationrunner.entity.Player`): Mutable class representing the player entity with gridX and gridY position. Spawns at random grid position via factory method. Implements `move(deltaX, deltaY, GridConfig)` with boundary checking. Renders as blue circle at 60% cell size (CIRCLE_SIZE_RATIO = 0.6). Implements equals(), hashCode(), toString() manually.
+- **App** (`com.simulationrunner.App`): Main JavaFX application entry point. Creates 10x10 grid with 50px cells and 3 keys. Handles WASD keyboard input, delegates to player movement, checks for key collection after each move, and triggers manual render updates (not a continuous game loop).
+- **Grid** (`com.simulationrunner.Grid`): Represents the game grid, wraps GridConfig with validation. Creates and manages Player via `Player.createRandom()` and Keys via `Key.createRandomKeys()`. Constructor takes keyCount parameter.
+- **GridConfig** (`com.simulationrunner.config.GridConfig`): Immutable configuration class for grid dimensions (gridWidth, gridHeight) and cellSize. Provides computed pixel dimensions via `getPixelWidth()`, `getPixelHeight()`, and `getPixelHeightWithHUD(hudHeight)`. Default constructor creates 10x10 grid with 10px cells.
+- **Entity** (`com.simulationrunner.entity.Entity`): Abstract base class for all game entities. Defines protected gridX/gridY position fields, abstract `render(GraphicsContext, GridConfig)` method, and utility `manhattanDistance()` for spawn distance calculations. Implements equals(), hashCode(), toString() that subclasses inherit.
+- **Player** (`com.simulationrunner.entity.Player`): Extends Entity. Spawns at random grid position via `createRandom()` factory method. Implements `move(deltaX, deltaY, GridConfig)` with boundary checking. Renders as blue circle at 60% cell size (CIRCLE_SIZE_RATIO = 0.6).
+- **Key** (`com.simulationrunner.entity.Key`): Extends Entity. Spawns at least 5 tiles away from player (Manhattan distance) via `createRandomKeys(config, player, count)`. Has `collected` boolean state, `collect()` method, and `isCollected()` getter. Renders as gold rectangle at 30% cell size (RECTANGLE_SIZE_RATIO = 0.3). Does not render when collected.
+- **HUD** (`com.simulationrunner.ui.HUD`): Heads-Up Display system. Renders 10px footer at bottom of canvas showing key collection status. Displays key icons with brightness reduction for uncollected keys (40% brightness via UNCOLLECTED_BRIGHTNESS constant). Integrates with GridConfig via `getPixelHeightWithHUD()`.
 - **Constants** (`com.simulationrunner.Constants`): Utility class defining default values (DEFAULT_GRID_WIDTH=10, DEFAULT_GRID_HEIGHT=10, DEFAULT_CELL_SIZE=10). **Note:** Currently unused in App, which uses hardcoded GridConfig instead.
 - **SystemInfo** (`com.simulationrunner.SystemInfo`): Utility class for retrieving Java and JavaFX runtime versions via `javaVersion()` and `javafxVersion()` methods.
 
 ### Entity System
-- **Player was converted from a record to a mutable class** to support movement (commit 0138739)
-- Records are immutable and incompatible with changing position state; mutable class pattern used instead
+- **Abstract Entity base class** introduced (commit 79b65fb) to reduce code duplication between Player and Key
+- Entity defines protected gridX/gridY fields, abstract render() method, and shared utility methods (manhattanDistance, equals, hashCode, toString)
+- **Player was converted from a record to a mutable class** to support movement (commit 0138739) - records are immutable and incompatible with changing position state
 - Each entity is responsible for its own rendering via a `render(GraphicsContext, GridConfig)` method
-- Player spawns randomly using `Player.createRandom(GridConfig)` factory method
+- Entities spawn randomly using factory methods (`Player.createRandom()`, `Key.createRandomKeys()`)
+- Keys spawn with minimum distance constraint (5 tiles from player via Manhattan distance) to prevent trivial spawns
 - Entities are positioned using grid coordinates, then converted to pixel coordinates for rendering (gridX * cellSize)
-- Movement logic is encapsulated within the entity (Player.move() includes boundary checking)
+- Movement logic is encapsulated within Player.move() with boundary checking
 
 ### Input System
 - **Keyboard Controls:** WASD keys for movement (W=up, A=left, S=down, D=right)
 - Event-driven architecture using JavaFX `scene.setOnKeyPressed()` handler in App
-- Input handling flow: KeyEvent → switch on KeyCode → player.move(deltaX, deltaY, config) → render()
+- Input handling flow: KeyEvent → switch on KeyCode → player.move(deltaX, deltaY, config) → checkKeyPickup() → render()
+- Key collection checked after each movement by comparing player and key grid positions
 - Manual render trigger after each keypress (no continuous game loop)
 - Direct coupling between App and Player (no input manager or command pattern)
 
 ### Rendering System
 - **Manual render triggers** - not a continuous game loop; render() called explicitly after state changes
-- Two-phase rendering process:
-  1. Clear canvas and draw grid lines
-  2. Delegate entity rendering via entity.render(GraphicsContext, GridConfig)
+- Three-phase rendering process:
+  1. Clear canvas and draw grid lines (only in grid area, not HUD footer)
+  2. Delegate entity rendering via entity.render(GraphicsContext, GridConfig) for all keys, then player
+  3. Render HUD footer via hud.render(gc, config, keys)
 - Entity self-rendering pattern: each entity converts its own grid coordinates to pixels
-- Player renders as filled blue circle centered in grid cell at 60% cell size (CIRCLE_SIZE_RATIO constant)
+- Player renders as filled blue circle centered in grid cell at 60% cell size
+- Keys render as filled gold rectangles at 30% cell size (invisible when collected)
+- HUD renders 10px footer below grid with key collection status (collected keys bright, uncollected dimmed to 40%)
 
 ### Testing
-- **Test Framework:** JUnit 5.11.4 with comprehensive unit test coverage
-- **GridConfigTest** (`src/test/java/.../config/GridConfigTest.java`): Tests constructors, pixel calculations, validation, toString()
-- **PlayerTest** (`src/test/java/.../entity/PlayerTest.java`): 204 lines of tests covering:
-  - Random spawn distribution verification using `@RepeatedTest(100)` to ensure statistical randomness
-  - Constructor validation (positive coordinates, within bounds)
-  - Movement in all four directions with boundary checking
-  - Null safety for all methods (move, render)
-  - Equality, hashCode, toString contracts
+- **Test Framework:** JUnit 5.11.4 with comprehensive unit test coverage for core components
+- **GridConfigTest** (`src/test/java/.../config/GridConfigTest.java`): Tests constructors, pixel calculations (including HUD height), validation, toString()
+- **PlayerTest** (`src/test/java/.../entity/PlayerTest.java`): Tests random spawn, constructor validation, movement with boundary checking, null safety, equality contracts
+- **KeyTest** (`src/test/java/.../entity/KeyTest.java`): Tests random spawn with distance constraints, collection state, rendering behavior when collected
+- **HUDTest** (`src/test/java/.../ui/HUDTest.java`): Tests HUD rendering, key icon display, collected/uncollected visual states
 - **Test Coverage Gaps:** No tests for App, Grid, or SystemInfo classes
-- **No Integration Tests:** All tests are unit tests; no end-to-end testing of input → movement → rendering flow
+- **No Integration Tests:** All tests are unit tests; no end-to-end testing of input → movement → collection → rendering flow
 
 ## Design Decisions
 
-1. **Mutable Entity, Immutable Configuration**: Player position mutates to support movement, but GridConfig is immutable to prevent accidental modification during gameplay.
-2. **Top-Left Origin**: Standard screen coordinate system with (0,0) at top-left corner, matching JavaFX canvas coordinates.
-3. **Separation of Concerns**: Grid wraps GridConfig and contains game state (player reference), while GridConfig remains pure configuration.
-4. **Constructor Validation**: GridConfig and Player validate all parameters in constructors, throwing IllegalArgumentException for invalid values (fail-fast).
-5. **Record to Class Conversion**: Player was originally a Java record but converted to mutable class because records are immutable and cannot support changing state needed for movement.
-6. **Entity Self-Rendering**: Each entity implements its own render() method rather than centralized rendering logic, allowing entity-specific rendering behavior.
-7. **Manual Render Triggers**: Render is called explicitly after state changes rather than continuous game loop, suitable for turn-based/event-driven game.
+1. **Abstract Entity Hierarchy**: Created abstract Entity base class to share common code (position, rendering interface, utility methods) between Player and Key. Reduces duplication and makes adding new entities easier.
+2. **Mutable Entity, Immutable Configuration**: Entity position mutates to support movement and collection state, but GridConfig is immutable to prevent accidental modification during gameplay.
+3. **Top-Left Origin**: Standard screen coordinate system with (0,0) at top-left corner, matching JavaFX canvas coordinates.
+4. **Separation of Concerns**: Grid wraps GridConfig and contains game state (player, keys), while GridConfig remains pure configuration. HUD is separate UI component.
+5. **Constructor Validation**: GridConfig and Entity validate all parameters in constructors, throwing IllegalArgumentException for invalid values (fail-fast).
+6. **Record to Class Conversion**: Player was originally a Java record but converted to mutable class because records are immutable and cannot support changing state needed for movement.
+7. **Entity Self-Rendering**: Each entity implements its own render() method rather than centralized rendering logic, allowing entity-specific rendering behavior (e.g., Key doesn't render when collected).
+8. **Manual Render Triggers**: Render is called explicitly after state changes rather than continuous game loop, suitable for turn-based/event-driven game.
+9. **Spatial Spawn Constraints**: Keys spawn with minimum Manhattan distance (5 tiles) from player to prevent trivial collection. Fallback to farthest position for small grids.
+10. **HUD Integration**: Canvas height calculation includes HUD footer via `getPixelHeightWithHUD()`, keeping UI layout concerns in GridConfig rather than scattered across App.
 - Do not generate code during planning that is not the point. The LLM is just wasting tokens since it is duplicate generation.
