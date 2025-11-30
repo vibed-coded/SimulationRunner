@@ -2,6 +2,7 @@ package com.simulationrunner;
 
 import com.simulationrunner.config.GridConfig;
 import com.simulationrunner.entity.Key;
+import com.simulationrunner.ui.HUD;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -18,6 +19,7 @@ public class App extends Application {
     private Grid grid;
     private GridConfig config;
     private GraphicsContext gc;
+    private HUD hud;
     private int width;
     private int height;
     private int cellSize;
@@ -26,9 +28,10 @@ public class App extends Application {
     public void start(Stage stage) {
         config = new GridConfig(10, 10, 50);
         grid = new Grid(config, 3); // Create grid with 3 keys
+        hud = new HUD();
 
         width = config.getPixelWidth();
-        height = config.getPixelHeight();
+        height = config.getPixelHeightWithHUD(HUD.getFooterHeight());
         cellSize = config.getCellSize();
 
         Canvas canvas = new Canvas(width, height);
@@ -69,18 +72,20 @@ public class App extends Application {
     }
 
     private void render() {
-        // Clear canvas
+        int gridPixelHeight = config.getPixelHeight();
+
+        // Clear canvas (including HUD area)
         gc.clearRect(0, 0, width, height);
 
-        // Draw grid lines
+        // Draw grid lines (only in grid area, not footer)
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
 
         for (int x = 0; x <= width; x += cellSize) {
-            gc.strokeLine(x, 0, x, height);
+            gc.strokeLine(x, 0, x, gridPixelHeight);
         }
 
-        for (int y = 0; y <= height; y += cellSize) {
+        for (int y = 0; y <= gridPixelHeight; y += cellSize) {
             gc.strokeLine(0, y, width, y);
         }
 
@@ -91,6 +96,9 @@ public class App extends Application {
 
         // Render the player
         grid.getPlayer().render(gc, config);
+
+        // Render HUD
+        hud.render(gc, config, grid.getKeys());
     }
 
     public static void main(String[] args) {
