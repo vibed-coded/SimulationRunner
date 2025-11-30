@@ -70,6 +70,28 @@ public class Player {
     }
 
     /**
+     * Moves the player by the specified delta if the new position is within bounds.
+     *
+     * @param deltaX the change in X coordinate
+     * @param deltaY the change in Y coordinate
+     * @param config the grid configuration for boundary checking
+     * @throws NullPointerException if config is null
+     */
+    public void move(int deltaX, int deltaY, GridConfig config) {
+        Objects.requireNonNull(config, "GridConfig cannot be null");
+
+        int newX = gridX + deltaX;
+        int newY = gridY + deltaY;
+
+        // Only update position if new position is within bounds
+        if (newX >= 0 && newX < config.getGridWidth() &&
+            newY >= 0 && newY < config.getGridHeight()) {
+            this.gridX = newX;
+            this.gridY = newY;
+        }
+    }
+
+    /**
      * Renders the player on the canvas as a blue circle centered in its grid cell.
      *
      * @param gc the graphics context to draw on

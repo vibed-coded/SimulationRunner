@@ -14,19 +14,51 @@ import javafx.stage.Stage;
  * JavaFX App
  */
 public class App extends Application {
+    private Grid grid;
+    private GridConfig config;
+    private GraphicsContext gc;
+    private int width;
+    private int height;
+    private int cellSize;
 
     @Override
     public void start(Stage stage) {
-        GridConfig config = new GridConfig(10, 10, 50);
-        Grid grid = new Grid(config);
+        config = new GridConfig(10, 10, 50);
+        grid = new Grid(config);
 
-        int width = config.getPixelWidth();
-        int height = config.getPixelHeight();
-        int cellSize = config.getCellSize();
+        width = config.getPixelWidth();
+        height = config.getPixelHeight();
+        cellSize = config.getCellSize();
 
         Canvas canvas = new Canvas(width, height);
-        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc = canvas.getGraphicsContext2D();
 
+        // Initial render
+        render();
+
+        var scene = new Scene(new StackPane(canvas), width, height);
+
+        // Add keyboard event handler for WASD controls
+        scene.setOnKeyPressed(event -> {
+            switch (event.getCode()) {
+                case W -> grid.getPlayer().move(0, -1, config);  // Up
+                case A -> grid.getPlayer().move(-1, 0, config);  // Left
+                case S -> grid.getPlayer().move(0, 1, config);   // Down
+                case D -> grid.getPlayer().move(1, 0, config);   // Right
+            }
+            render(); // Redraw after movement
+        });
+
+        stage.setScene(scene);
+        stage.setTitle("SimulationRunner");
+        stage.show();
+    }
+
+    private void render() {
+        // Clear canvas
+        gc.clearRect(0, 0, width, height);
+
+        // Draw grid lines
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
 
@@ -40,11 +72,6 @@ public class App extends Application {
 
         // Render the player
         grid.getPlayer().render(gc, config);
-
-        var scene = new Scene(new StackPane(canvas), width, height);
-        stage.setScene(scene);
-        stage.setTitle("SimulationRunner");
-        stage.show();
     }
 
     public static void main(String[] args) {
